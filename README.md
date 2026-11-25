@@ -44,7 +44,7 @@ npm --prefix pwa run cypress:run -- --spec cypress/e2e/run.cy.js
 
 ## Deploying
 
-The app is served by GitHub Pages at `https://<user>.github.io/thistle/`. The production build uses the base path `/thistle/`. The dev server uses `/`.
+The app is served by GitHub Pages at https://thistle.robynm.net (the domain in `pwa/public/CNAME`), from the root path `/`.
 
 1. Work on a short-lived branch and open a pull request into `main`. `e2e.yml` runs the suite.
 2. Merge. `deploy.yml` runs the suite again as a gate, then builds and publishes `pwa/dist/`.
@@ -53,7 +53,7 @@ The app is served by GitHub Pages at `https://<user>.github.io/thistle/`. The pr
 ### One-time GitHub setup
 
 - Settings → Pages → Source: **GitHub Actions**.
-- If you later move to a custom domain, add `pwa/public/CNAME`, set it under Settings → Pages, and change `base` in `pwa/vite.config.js` to `"/"`.
+- Custom domain: set it under Settings → Pages, and keep `pwa/public/CNAME` matching it. That file is published with every deploy. Turn on **Enforce HTTPS** once the certificate is issued, since service workers and installing the app need HTTPS.
 
 ## Updating an installed app
 

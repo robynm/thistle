@@ -2,10 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Production is served from GitHub Pages at /thistle/; the dev server (and so the
-// Cypress suite) runs at the root. Manifest URLs are relative so they work under both.
-export default defineConfig(({ command }) => ({
-  base: command === "build" ? "/thistle/" : "/",
+// Served from the root of a custom domain (see public/CNAME), so assets live at "/".
+export default defineConfig({
+  base: "/",
   build: { outDir: "dist", emptyOutDir: true },
   server: { port: 5173, strictPort: true },
   plugins: [
@@ -43,4 +42,4 @@ export default defineConfig(({ command }) => ({
       },
     }),
   ],
-}));
+});
