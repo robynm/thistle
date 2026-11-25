@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Thistle</title>
+    <meta name="description" content="Interval timers for work, rest and reps." />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131210" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Thistle" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" type="image/png" href="/icons/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap"
+    />
+    <script>
+      // Apply the saved theme before first paint so there is no flash of the wrong palette.
+      try {
+        var t = JSON.parse(localStorage.getItem("thistle:theme:v1"));
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <style>
+      html[data-theme="dusk"], html[data-theme="dusk"] body { background: #131210; }
+      .boot { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+      .boot-mark { width: 64px; height: 64px; border-radius: 999px; background: #FFC629; display: flex; align-items: center; justify-content: center; animation: boot-bloom .55s cubic-bezier(.34,1.56,.64,1) both; }
+      .boot-label { font: 500 13px/1 "Inter", system-ui, sans-serif; color: #6F6B62; }
+      @keyframes boot-bloom { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot">
+        <div class="boot-mark">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#17160F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 9.6V3.2M12 9.6 9 4.2M12 9.6l3-5.4M12 9.6 7.2 6.2M12 9.6l4.8-3.4" />
+            <ellipse cx="12" cy="12.4" rx="3.4" ry="2.9" />
+            <path d="M10 11.2l4 2.4M14 11.2l-4 2.4M12 15.3V21.5" />
+            <path d="M12 19.2c-2.6 0-4.4-1.4-5-3.6 2.4-.2 4.2.8 5 3.6Z" />
+            <path d="M12 18c2.6 0 4.4-1.4 5-3.6-2.4-.2-4.2.8-5 3.6Z" />
+          </svg>
+        </div>
+        <div class="boot-label">Loading…</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

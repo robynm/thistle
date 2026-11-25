@@ -1,0 +1,86 @@
+{
+  "format": "thistle-backup-v1",
+  "exportedAt": "2026-11-20T10:00:00.000Z",
+  "counts": {
+    "timers": 2,
+    "history": 1,
+    "lists": 1
+  },
+  "data": {
+    "timers": [
+      {
+        "id": "t_backup1",
+        "name": "Backup Tabata",
+        "createdAt": "2026-11-01T08:00:00.000Z",
+        "updatedAt": "2026-11-01T08:00:00.000Z",
+        "blocks": [
+          {
+            "id": "b_backup1",
+            "name": "",
+            "reps": 8,
+            "steps": [
+              {
+                "id": "s_backup1",
+                "kind": "work",
+                "name": "",
+                "seconds": 20
+              },
+              {
+                "id": "s_backup2",
+                "kind": "rest",
+                "name": "",
+                "seconds": 10
+              }
+            ]
+          }
+        ],
+        "listId": "l_backup"
+      },
+      {
+        "id": "t_existing",
+        "name": "Should not overwrite on merge",
+        "blocks": [
+          {
+            "id": "b_x",
+            "name": "",
+            "reps": 1,
+            "steps": [
+              {
+                "id": "s_x",
+                "kind": "work",
+                "name": "",
+                "seconds": 30
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "history": [
+      {
+        "id": "h_backup1",
+        "timerId": "t_backup1",
+        "timerName": "Backup Tabata",
+        "source": "timer",
+        "startedAt": "2026-11-19T07:00:00.000Z",
+        "finishedAt": "2026-11-19T07:04:00.000Z",
+        "elapsedSec": 230,
+        "plannedSec": 230,
+        "progress": 1,
+        "completed": true
+      }
+    ],
+    "quick": {
+      "work": 30,
+      "rest": 15,
+      "rounds": 6
+    },
+    "lists": [
+      {
+        "id": "l_backup",
+        "name": "Backup list",
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ]
+  }
+}

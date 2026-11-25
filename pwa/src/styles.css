@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* Step-kind classes are built at runtime (`bg-${kind}`), so Tailwind must be told about them. */
+@source inline("{bg,text,border,stroke,fill}-{work,rest,warmup,cooldown,ready}{,-ink,-soft}");
+
+/* Every color reads a variable, so the [data-theme="dusk"] block restyles all utilities.
+   Semantic names rather than numbered scales:
+     bg / surface / surface-2  page, grey blocks, pressed blocks
+     ink / muted / faint       text, secondary text, placeholders and icons at rest
+     line                      hairline dividers
+     brand / on-brand          sunflower yellow and the dark text that sits on it
+     <kind>, <kind>-ink, <kind>-soft
+                               a step kind's fill (graphics, fills with ink text on top),
+                               its readable text color on bg, and a faint tint */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-work: var(--work);
+  --color-work-ink: var(--work-ink);
+  --color-work-soft: var(--work-soft);
+  --color-rest: var(--rest);
+  --color-rest-ink: var(--rest-ink);
+  --color-rest-soft: var(--rest-soft);
+  --color-warmup: var(--warmup);
+  --color-warmup-ink: var(--warmup-ink);
+  --color-warmup-soft: var(--warmup-soft);
+  --color-cooldown: var(--cooldown);
+  --color-cooldown-ink: var(--cooldown-ink);
+  --color-cooldown-soft: var(--cooldown-soft);
+  --color-ready: var(--ready);
+  --color-ready-ink: var(--ready-ink);
+  --color-ready-soft: var(--ready-soft);
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-display: "Inter Tight", "Inter", -apple-system, system-ui, sans-serif;
+}
+
+/* Thistle (light, default). */
+:root {
+  --bg: #FFFFFF;
+  --surface: #F4F3EF;
+  --surface-2: #EBE9E3;
+  --ink: #17160F;
+  --muted: #6F6B62;
+  --faint: #A8A49B;
+  --line: #ECEAE4;
+  --brand: #FFC629;
+  --on-brand: #17160F;
+  --brand-soft: #FFF1C2; /* pale yellow; same in both themes, always with on-brand text */
+
+  --work: #FF5E4F;      --work-ink: #C93A2D;     --work-soft: #FFEDEA;
+  --rest: #2FCB7E;      --rest-ink: #17804B;     --rest-soft: #E3F8EC;
+  --warmup: #A08CFF;    --warmup-ink: #6A4FE0;   --warmup-soft: #EFEBFF;
+  --cooldown: #45B3FF;  --cooldown-ink: #1A6FB0; --cooldown-soft: #E4F3FF;
+  --ready: #FFC629;     --ready-ink: #8A6500;    --ready-soft: #FFF6D9;
+  color-scheme: light;
+}
+
+/* Dusk (dark). Fills stay the same; the -ink and -soft variants are re-tuned for a dark page. */
+[data-theme="dusk"] {
+  --bg: #131210;
+  --surface: #1F1E1A;
+  --surface-2: #2A2924;
+  --ink: #F4F2EC;
+  --muted: #A09C92;
+  --faint: #6B675F;
+  --line: #2A2925;
+
+  --work-ink: #FF8A7E;     --work-soft: #3A1E1B;
+  --rest-ink: #5FDC9B;     --rest-soft: #16301F;
+  --warmup-ink: #B8A9FF;   --warmup-soft: #27213D;
+  --cooldown-ink: #7CC8FF; --cooldown-soft: #172A3A;
+  --ready-ink: #FFD45C;    --ready-soft: #3A3115;
+  color-scheme: dark;
+}
+
+html, body, #root { height: 100%; margin: 0; padding: 0; background: var(--bg); }
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+@layer base {
+  header { padding-top: env(safe-area-inset-top); }
+  main { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  input, select, button { font: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+}
+
+/* The item being dragged by useSortable. */
+[data-dragging="true"] { border-radius: 18px; box-shadow: 0 14px 32px -12px rgba(0, 0, 0, 0.35); }
+
+/* Fills over HOLD_TO_EXIT_MS while the run screen is held. */
+@keyframes hold-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.hold-fill { transform-origin: left; animation: hold-fill 1s linear both; }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fade-up .3s cubic-bezier(.2,.7,.2,1) both; }
+
+@keyframes pop { 0% { transform: scale(.7); opacity: 0; } 70% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); } }
+.pop { animation: pop .45s cubic-bezier(.34,1.56,.64,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .pop { animation: none; }
+  .hold-fill { animation-name: none; transform: scaleX(1); }
+}
