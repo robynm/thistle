@@ -1,14 +1,15 @@
 // Create or edit a timer. Works on a private draft; nothing is saved until Save.
 // Closing with unsaved changes asks first.
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { fmtShort } from "../lib/format.js";
 import { I } from "../lib/icons.jsx";
-import { newBlock, totalSeconds } from "../lib/timerModel.js";
+import { moveItem, newBlock, totalSeconds } from "../lib/timerModel.js";
+import { useSortable } from "../lib/sortable.js";
 import { ui } from "../lib/ui.js";
-import { BlockEditor, swap } from "./BlockEditor.jsx";
+import { BlockEditor } from "./BlockEditor.jsx";
 import { Modal } from "./Modal.jsx";
 
-function TimerEditorModal({ timer, isNew, onSave, onDelete, onDuplicate, onClose }) {
+function TimerEditorModal({ timer, lists, isNew, onSave, onDelete, onDuplicate, onClose }) {
   const [draft, setDraft] = useState(() => structuredClone(timer));
   const [error, setError] = useState("");
   const initial = useMemo(() => JSON.stringify(timer), [timer]);
@@ -17,6 +18,12 @@ function TimerEditorModal({ timer, isNew, onSave, onDelete, onDuplicate, onClose
 
   const setBlocks = (blocks) => setDraft((d) => ({ ...d, blocks }));
   const updateBlock = (bi, patch) => setBlocks(draft.blocks.map((b, i) => (i === bi ? { ...b, ...patch } : b)));
+  const blocksRef = useRef(null);
+  const blockSort = useSortable({
+    containerRef: blocksRef,
+    selector: "[data-block-item]",
+    onDrop: ({ key, to }) => setBlocks(moveItem(draft.blocks, draft.blocks.findIndex((b) => b.id === key), to)),
+  });
 
   // Returns false to stay open, which the Back button handling relies on.
   const requestClose = () => {
@@ -67,20 +74,36 @@ function TimerEditorModal({ timer, isNew, onSave, onDelete, onDuplicate, onClose
         data-testid="editor-name"
         className={`${ui.input} w-full font-semibold`}
       />
+      {lists.length > 0 && (
+        <label className="flex items-center justify-between gap-3 mt-2 pl-3.5 pr-2 py-1.5 rounded-xl bg-surface">
+          <span className="text-sm text-muted">List</span>
+          <select
+            value={draft.listId ?? ""}
+            onChange={(e) => setDraft((d) => ({ ...d, listId: e.target.value || null }))}
+            data-testid="editor-list"
+            className="bg-transparent text-ink font-medium text-right py-1 outline-none max-w-[60%]"
+          >
+            <option value="">No list</option>
+            {lists.map((l) => (
+              <option key={l.id} value={l.id}>{l.name || "Untitled list"}</option>
+            ))}
+          </select>
+        </label>
+      )}
       <p className="text-xs text-muted mt-3 mb-2 px-1">Each block runs its steps in order, then repeats.</p>
 
-      <div className="space-y-2">
+      <div ref={blocksRef} className="flex flex-col gap-2">
         {draft.blocks.map((b, bi) => (
-          <BlockEditor
-            key={b.id}
-            block={b}
-            index={bi}
-            onChange={(patch) => updateBlock(bi, patch)}
-            onMoveUp={bi > 0 ? () => setBlocks(swap(draft.blocks, bi, bi - 1)) : null}
-            onMoveDown={bi < draft.blocks.length - 1 ? () => setBlocks(swap(draft.blocks, bi, bi + 1)) : null}
-            onRemove={() => setBlocks(draft.blocks.filter((_, i) => i !== bi))}
-            canRemove={draft.blocks.length > 1}
-          />
+          <div key={b.id} data-block-item data-sort-key={b.id}>
+            <BlockEditor
+              block={b}
+              index={bi}
+              gripProps={blockSort.handleProps}
+              onChange={(patch) => updateBlock(bi, patch)}
+              onRemove={() => setBlocks(draft.blocks.filter((_, i) => i !== bi))}
+              canRemove={draft.blocks.length > 1}
+            />
+          </div>
         ))}
       </div>
 

@@ -60,5 +60,7 @@ Use a fill with `on-brand` text on top (the kind picker, the pause button), the 
 
 - **Header:** the view title and a short subtitle, the view's one action (Timers: **New**), and ⋯. No logo.
 - **Bottom nav:** icon plus label. The active tab gets a yellow pill behind its icon.
-- **Run screen:** follows the theme (white in Thistle). The kind label, the countdown ring and the pause button take the current step's color. The ring empties as the step runs down. Overall progress is a thin bar above the controls.
+- **Reordering:** anything that can be reordered has a ⠿ grip (`DragGrip`) at its left. Drag only from the grip, so taps and scrolling elsewhere behave normally. The item being dragged lifts with a shadow.
+- **Lists:** timers with no list come first, with no header. Each list is a section with a grip, a chevron, its name, a count and an edit button. Lists start collapsed.
+- **Run screen:** follows the theme (white in Thistle). Holding the background for 1 second exits without asking: a pale yellow pill at the top fills while you hold. A faint "Hold anywhere to exit" line under the controls explains it. The kind label, the countdown ring and the pause button take the current step's color. The ring empties as the step runs down. Overall progress is a thin bar above the controls.
 - **Modals:** a bottom sheet on phones, with the title and × at the top. Actions sit in a footer separated by a hairline.

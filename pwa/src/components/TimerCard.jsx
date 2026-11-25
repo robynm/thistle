@@ -11,11 +11,12 @@ function summary(timer) {
   return b.reps > 1 ? `${b.reps} × ${steps}` : steps;
 }
 
-function TimerCard({ timer, onRun, onEdit }) {
+function TimerCard({ timer, onRun, onEdit, grip }) {
   const total = totalSeconds(timer);
   const parts = kindBreakdown(timer);
   return (
-    <div className="bg-surface rounded-[18px] p-3.5 flex items-center gap-3" data-testid="timer-card">
+    <div className="bg-surface rounded-[18px] p-3.5 pl-2 flex items-center gap-2" data-testid="timer-card">
+      {grip}
       <button type="button" onClick={onEdit} className="flex-1 min-w-0 text-left active:opacity-70 transition-opacity" data-testid="timer-card-edit">
         <h3 className="font-display font-semibold text-base text-ink truncate" data-testid="timer-card-name">
           {timer.name || "Untitled timer"}

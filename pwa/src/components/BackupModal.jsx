@@ -9,7 +9,7 @@ import { Modal } from "./Modal.jsx";
 
 const counts = (t, h) => `${plural(t, "timer")} and ${plural(h, "history entry", "history entries")}`;
 
-function BackupModal({ timers, history, quick, onImport, onClose }) {
+function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
   const fileRef = useRef(null);
   const [pending, setPending] = useState(null);
   const [message, setMessage] = useState(null);
@@ -17,7 +17,7 @@ function BackupModal({ timers, history, quick, onImport, onClose }) {
   const [logEntries, setLogEntries] = useState([]);
 
   const exportNow = () => {
-    downloadJson(buildBackup({ timers, history, quick }), backupFileName());
+    downloadJson(buildBackup({ timers, lists, history, quick }), backupFileName());
     setMessage({ ok: true, text: `Saved ${counts(timers.length, history.length)} to your downloads.` });
   };
 

@@ -20,6 +20,7 @@ pwa/
 │       ├── constants.js  ← storage keys, step kinds and colors, timings
 │       ├── timerModel.js ← timer shape, flatten-to-segments, totals, validation
 │       ├── runner.js     ← useRunner: the countdown engine and cues
+│       ├── sortable.js   ← useSortable: drag (grip) and arrow-key reordering
 │       ├── sound.js      ← Web Audio beeps
 │       ├── storage.js    ← localStorage helpers
 │       ├── backup.js     ← export / import
@@ -41,9 +42,15 @@ A timer is a list of **blocks**. Each block is a list of **steps** (Work, Rest, 
 
 `useRunner` moves through those segments using `Date.now()` differences rather than counting ticks, so it stays correct when the browser throttles a background tab. It beeps at 3-2-1 before each step ends, at the start of each step, and when the timer finishes. **Back** restarts the current step if you're more than 3 seconds into it, and goes to the previous step otherwise.
 
+## Lists and ordering
+
+Lists work like folders: a timer has a `listId`, or `null` to sit at the top of the Timers tab. The `timers` array is always kept grouped by `groupTimers()`: timers with no list first, then each list's timers in list order. The order inside each group is the user's order. Lists start collapsed; the ones you expand are remembered per device. Deleting a list moves its timers to the top level.
+
+Timers, lists, blocks and steps are reordered by dragging their grip (`useSortable`), or with ArrowUp/ArrowDown while the grip has focus. On the Timers tab, everything is one flat column for dragging: where a timer lands decides its list (the nearest list header above it), and dropping it just under a collapsed header adds it to the end of that list. Dragging a list collapses every list until you let go.
+
 ## History
 
-A run is saved to History when it finishes, or when you stop it after at least 10 seconds of active time. Get-ready and paused time don't count. Stopped runs are saved as **Partial**, with how far through the timer you got.
+A run is saved to History when it finishes, or when you leave it after at least 10 seconds of active time. You can leave with × (which asks first) or by holding the background for 1 second (which doesn't). Get-ready and paused time don't count. Stopped runs are saved as **Partial**, with how far through the timer you got.
 
 ## Theming
 

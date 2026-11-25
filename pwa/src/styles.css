@@ -22,6 +22,7 @@
   --color-line: var(--line);
   --color-brand: var(--brand);
   --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
   --color-work: var(--work);
   --color-work-ink: var(--work-ink);
   --color-work-soft: var(--work-soft);
@@ -52,6 +53,7 @@
   --line: #ECEAE4;
   --brand: #FFC629;
   --on-brand: #17160F;
+  --brand-soft: #FFF1C2; /* pale yellow; same in both themes, always with on-brand text */
 
   --work: #FF5E4F;      --work-ink: #C93A2D;     --work-soft: #FFEDEA;
   --rest: #2FCB7E;      --rest-ink: #17804B;     --rest-soft: #E3F8EC;
@@ -96,6 +98,13 @@ body {
   :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 }
 
+/* The item being dragged by useSortable. */
+[data-dragging="true"] { border-radius: 18px; box-shadow: 0 14px 32px -12px rgba(0, 0, 0, 0.35); }
+
+/* Fills over HOLD_TO_EXIT_MS while the run screen is held. */
+@keyframes hold-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.hold-fill { transform-origin: left; animation: hold-fill 1s linear both; }
+
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .fade-up { animation: fade-up .3s cubic-bezier(.2,.7,.2,1) both; }
 
@@ -104,4 +113,5 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .fade-up, .pop { animation: none; }
+  .hold-fill { animation-name: none; transform: scaleX(1); }
 }

@@ -5,6 +5,7 @@ import { AppHeader } from "./components/AppHeader.jsx";
 import { BackupModal } from "./components/BackupModal.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { HistoryView } from "./components/HistoryView.jsx";
+import { ListModal } from "./components/ListModal.jsx";
 import { InstallBanner } from "./components/InstallBanner.jsx";
 import { QuickView } from "./components/QuickView.jsx";
 import { RunScreen } from "./components/RunScreen.jsx";
@@ -20,14 +21,23 @@ import { Log } from "./lib/log.js";
 import { unlockAudio } from "./lib/sound.js";
 import { lsGet, lsSet, requestPersistence } from "./lib/storage.js";
 import { ui } from "./lib/ui.js";
-import { cleanHistoryEntry, cleanTimer, newTimer, quickTimer, totalSeconds, uid } from "./lib/timerModel.js";
+import { cleanHistoryEntry, cleanList, cleanTimer, groupTimers, moveTimer, newTimer, quickTimer, totalSeconds, uid } from "./lib/timerModel.js";
 import { SEED_TIMERS } from "./seed.js";
 
 // --- Loading --------------------------------------------------
+function loadLists() {
+  const raw = lsGet(STORAGE_KEYS.lists, []);
+  return Array.isArray(raw) ? raw.map(cleanList).filter(Boolean) : [];
+}
 function loadTimers() {
   const raw = lsGet(STORAGE_KEYS.timers, null);
   if (raw === null) return SEED_TIMERS;
-  return Array.isArray(raw) ? raw.map(cleanTimer).filter(Boolean) : [];
+  const timers = Array.isArray(raw) ? raw.map(cleanTimer).filter(Boolean) : [];
+  return groupTimers(timers, loadLists());
+}
+function loadOpenLists() {
+  const raw = lsGet(STORAGE_KEYS.listsOpen, []);
+  return Array.isArray(raw) ? raw.filter((id) => typeof id === "string") : [];
 }
 function loadHistory() {
   const raw = lsGet(STORAGE_KEYS.history, []);
@@ -51,6 +61,8 @@ const copyTimer = (t) => ({
 function App() {
   const [view, setView] = useState("timers");
   const [timers, setTimers] = useState(loadTimers);
+  const [lists, setLists] = useState(loadLists);
+  const [openLists, setOpenLists] = useState(loadOpenLists);
   const [history, setHistory] = useState(loadHistory);
   const [quick, setQuick] = useState(loadQuick);
   const [soundOn, setSoundOn] = useState(() => lsGet(STORAGE_KEYS.sound, true) !== false);
@@ -58,17 +70,20 @@ function App() {
   const [showSplash, setShowSplash] = useState(() => !isStandalone() && !lsGet(STORAGE_KEYS.splashSeen, false));
   const [bannerHidden, setBannerHidden] = useState(false);
   const [editor, setEditor] = useState(null); // { timer, isNew }
+  const [listEditor, setListEditor] = useState(null); // { list, isNew }
   const [run, setRun] = useState(null); // { timer, source, startedAt }
   const [backupOpen, setBackupOpen] = useState(false);
   const install = useInstallPrompt();
 
   useEffect(() => {
-    Log.info("load", { timers: timers.length, history: history.length });
+    Log.info("load", { timers: timers.length, lists: lists.length, history: history.length });
     requestPersistence();
   }, []);
 
   // --- Persistence ----------------------------------------------
   useEffect(() => { lsSet(STORAGE_KEYS.timers, timers); }, [timers]);
+  useEffect(() => { lsSet(STORAGE_KEYS.lists, lists); }, [lists]);
+  useEffect(() => { lsSet(STORAGE_KEYS.listsOpen, openLists); }, [openLists]);
   useEffect(() => { lsSet(STORAGE_KEYS.history, history); }, [history]);
   useEffect(() => { lsSet(STORAGE_KEYS.quick, quick); }, [quick]);
   useEffect(() => { lsSet(STORAGE_KEYS.sound, soundOn); }, [soundOn]);
@@ -80,10 +95,13 @@ function App() {
   // --- Timers ---------------------------------------------------
   const saveTimer = (draft) => {
     const now = new Date().toISOString();
-    const exists = timers.some((t) => t.id === draft.id);
+    const before = timers.find((t) => t.id === draft.id);
     const saved = { ...draft, createdAt: draft.createdAt || now, updatedAt: now };
-    setTimers((list) => (exists ? list.map((t) => (t.id === saved.id ? saved : t)) : [saved, ...list]));
-    Log.info("timer.saved", { id: saved.id, blocks: saved.blocks.length, steps: saved.blocks.reduce((n, b) => n + b.steps.length, 0), created: !exists });
+    // A timer that changes list goes to the front of its new list.
+    const moved = before && before.listId !== saved.listId;
+    setTimers((list) => groupTimers(before && !moved ? list.map((t) => (t.id === saved.id ? saved : t)) : [saved, ...list.filter((t) => t.id !== saved.id)], lists));
+    Log.info("timer.saved", { id: saved.id, blocks: saved.blocks.length, steps: saved.blocks.reduce((n, b) => n + b.steps.length, 0), created: !before });
+    if (moved) Log.info("timer.moved", { id: saved.id, from: before.listId, to: saved.listId });
     setEditor(null);
   };
 
@@ -99,11 +117,48 @@ function App() {
     const copy = { ...copyTimer(source), createdAt: now, updatedAt: now };
     setTimers((list) => {
       const i = list.findIndex((t) => t.id === source.id);
-      return i < 0 ? [copy, ...list] : [...list.slice(0, i + 1), copy, ...list.slice(i + 1)];
+      return groupTimers(i < 0 ? [copy, ...list] : [...list.slice(0, i + 1), copy, ...list.slice(i + 1)], lists);
     });
     Log.info("timer.saved", { id: copy.id, blocks: copy.blocks.length, steps: copy.blocks.reduce((n, b) => n + b.steps.length, 0), created: true });
     setEditor(null);
   };
+
+  const moveTimerTo = (id, listId, index) => {
+    const t = timers.find((x) => x.id === id);
+    setTimers(moveTimer(timers, lists, id, listId, index));
+    if (t && t.listId !== listId) Log.info("timer.moved", { id, from: t.listId, to: listId });
+  };
+
+  // --- Lists ----------------------------------------------------
+  const saveList = (list) => {
+    const exists = lists.some((l) => l.id === list.id);
+    setLists((ls) => (exists ? ls.map((l) => (l.id === list.id ? list : l)) : [...ls, list]));
+    Log.info("list.saved", { id: list.id, created: !exists });
+    setListEditor(null);
+  };
+
+  // The list's timers move to the top level rather than being deleted.
+  const deleteList = (list) => {
+    const count = timers.filter((t) => t.listId === list.id).length;
+    const name = list.name || "Untitled list";
+    const msg = count
+      ? `Delete the list "${name}"? Its ${plural(count, "timer")} will move to the top of your Timers.`
+      : `Delete the list "${name}"?`;
+    if (!confirm(msg)) return;
+    const rest = lists.filter((l) => l.id !== list.id);
+    setLists(rest);
+    setTimers((ts) => groupTimers(ts.map((t) => (t.listId === list.id ? { ...t, listId: null } : t)), rest));
+    setOpenLists((o) => o.filter((id) => id !== list.id));
+    Log.info("list.deleted", { id: list.id, timersMoved: count });
+    setListEditor(null);
+  };
+
+  const reorderLists = (next) => {
+    setLists(next);
+    setTimers((ts) => groupTimers(ts, next));
+  };
+
+  const toggleList = (id) => setOpenLists((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
 
   // --- Runs -----------------------------------------------------
   // Called from the tap that starts the run, so audio can be unlocked inside the gesture.
@@ -128,7 +183,7 @@ function App() {
       completed: result.completed,
     };
     setHistory((h) => [entry, ...h]);
-    Log.info("run.finished", { timerId: entry.timerId, completed: entry.completed, elapsedSec: entry.elapsedSec });
+    Log.info("run.finished", { timerId: entry.timerId, completed: entry.completed, elapsedSec: entry.elapsedSec, exit: result.exit });
   };
 
   const clearHistory = () => {
@@ -141,16 +196,19 @@ function App() {
   const importBackup = (data, mode) => {
     let added;
     if (mode === "replace") {
-      setTimers(data.timers);
+      setLists(data.lists);
+      setTimers(groupTimers(data.timers, data.lists));
       setHistory([...data.history].sort(byNewest));
       if (data.quick) setQuick(data.quick);
-      added = { timers: data.timers.length, history: data.history.length };
+      added = { timers: data.timers.length, history: data.history.length, lists: data.lists.length };
     } else {
+      const l = mergeById(lists, data.lists);
       const t = mergeById(timers, data.timers);
       const h = mergeById(history, data.history);
-      setTimers(t.list);
+      setLists(l.list);
+      setTimers(groupTimers(t.list, l.list));
       setHistory(h.list.sort(byNewest));
-      added = { timers: t.added, history: h.added };
+      added = { timers: t.added, history: h.added, lists: l.added };
     }
     Log.info("backup.imported", { mode, ...added, skipped: data.skipped });
     return added;
@@ -193,7 +251,18 @@ function App() {
       />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-2 pb-32">
         {view === "timers" && (
-          <TimersView timers={timers} onRun={(t) => startRun(t, "timer")} onEdit={(t) => setEditor({ timer: t, isNew: false })} />
+          <TimersView
+            timers={timers}
+            lists={lists}
+            openLists={openLists}
+            onToggleList={toggleList}
+            onRun={(t) => startRun(t, "timer")}
+            onEdit={(t) => setEditor({ timer: t, isNew: false })}
+            onEditList={(l) => setListEditor({ list: l, isNew: false })}
+            onNewList={() => setListEditor({ list: { id: uid("l"), name: "", createdAt: new Date().toISOString() }, isNew: true })}
+            onMoveTimer={moveTimerTo}
+            onReorderLists={reorderLists}
+          />
         )}
         {view === "quick" && <QuickView quick={quick} onChange={setQuick} onStart={() => startRun(quickTimer(quick), "quick")} />}
         {view === "history" && <HistoryView history={history} onClear={clearHistory} />}
@@ -203,6 +272,7 @@ function App() {
       {editor && (
         <TimerEditorModal
           timer={editor.timer}
+          lists={lists}
           isNew={editor.isNew}
           onSave={saveTimer}
           onDelete={() => deleteTimer(editor.timer)}
@@ -211,7 +281,16 @@ function App() {
         />
       )}
       {backupOpen && (
-        <BackupModal timers={timers} history={history} quick={quick} onImport={importBackup} onClose={() => setBackupOpen(false)} />
+        <BackupModal timers={timers} lists={lists} history={history} quick={quick} onImport={importBackup} onClose={() => setBackupOpen(false)} />
+      )}
+      {listEditor && (
+        <ListModal
+          list={listEditor.list}
+          isNew={listEditor.isNew}
+          onSave={saveList}
+          onDelete={() => deleteList(listEditor.list)}
+          onClose={() => setListEditor(null)}
+        />
       )}
       {run && (
         <RunScreen

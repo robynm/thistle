@@ -35,6 +35,7 @@ describe("backup", () => {
     cy.readStore("history").then((h) => {
       expect(h.map((e) => e.id)).to.deep.eq(["h_backup1", "h_mine"]);
     });
+    cy.readStore("lists").then((lists) => expect(lists.map((l) => l.id)).to.deep.eq(["l_backup"]));
   });
 
   it("replaces everything after confirming", () => {
@@ -44,9 +45,11 @@ describe("backup", () => {
     cy.tid("backup-file").selectFile("cypress/fixtures/backup-valid.json", { force: true });
     cy.tid("backup-replace").click();
     cy.tid("backup-success").should("contain", "Restored 2 timers");
+    // Grouped: the top-level timer first, then the one in "Backup list".
     cy.readStore("timers").then((timers) => {
-      expect(timers.map((t) => t.id)).to.deep.eq(["t_backup1", "t_existing"]);
+      expect(timers.map((t) => t.id)).to.deep.eq(["t_existing", "t_backup1"]);
     });
+    cy.readStore("lists").then((lists) => expect(lists.map((l) => l.name)).to.deep.eq(["Backup list"]));
     cy.readStore("quick").should("deep.eq", { work: 30, rest: 15, rounds: 6 });
   });
 

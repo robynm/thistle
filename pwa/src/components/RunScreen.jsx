@@ -3,10 +3,11 @@
 // different at a glance.
 //
 // When the timer reaches the end it reports the run straight away via onFinish and
-// shows a summary. Stopping early (× or the device Back button) confirms first, then
-// reports a partial run.
-import { useMemo, useState } from "react";
-import { KIND_LABEL } from "../lib/constants.js";
+// shows a summary. Stopping early with × or the device Back button confirms first;
+// holding the background for HOLD_TO_EXIT_MS exits without asking. Both report a
+// partial run. `exit` in the result says which way it ended.
+import { useEffect, useMemo, useRef, useState } from "react";
+import { HOLD_TO_EXIT_MS, KIND_LABEL } from "../lib/constants.js";
 import { useBackButton } from "../lib/backNav.js";
 import { fmtClock, fmtShort } from "../lib/format.js";
 import { useBodyScrollLock, useWakeLock } from "../lib/hooks.js";
@@ -51,10 +52,15 @@ function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
     soundOn,
     onDone: (result) => {
       setSummary(result);
-      onFinish(result);
+      onFinish({ ...result, exit: "done" });
     },
   });
   useWakeLock(!run.done);
+
+  const exit = (how) => {
+    onFinish({ ...run.result(), exit: how });
+    onClose();
+  };
 
   const requestClose = () => {
     if (run.done) {
@@ -62,11 +68,41 @@ function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
       return true;
     }
     if (!confirm("Stop this workout? What you've done so far is saved to History.")) return false;
-    onFinish(run.result());
-    onClose();
+    exit("stop");
     return true;
   };
   useBackButton(true, requestClose);
+
+  // --- Hold to exit -------------------------------------------
+  // Only presses on the background count, not on buttons. Moving more than a few
+  // pixels (a scroll or swipe) or lifting early cancels.
+  const [holding, setHolding] = useState(false);
+  const hold = useRef(null);
+  const cancelHold = () => {
+    if (!hold.current) return;
+    clearTimeout(hold.current.timer);
+    hold.current = null;
+    setHolding(false);
+  };
+  const startHold = (e) => {
+    if (run.done || e.button > 0 || e.target.closest("button")) return;
+    cancelHold();
+    hold.current = {
+      x: e.clientX,
+      y: e.clientY,
+      timer: setTimeout(() => {
+        hold.current = null;
+        setHolding(false);
+        exit("hold");
+      }, HOLD_TO_EXIT_MS),
+    };
+    setHolding(true);
+  };
+  const moveHold = (e) => {
+    const h = hold.current;
+    if (h && Math.hypot(e.clientX - h.x, e.clientY - h.y) > 12) cancelHold();
+  };
+  useEffect(() => () => clearTimeout(hold.current?.timer), []);
 
   const seg = segments[run.index];
   const next = segments[run.index + 1];
@@ -76,11 +112,25 @@ function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-bg text-ink flex flex-col"
-      style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-0 z-50 bg-bg text-ink flex flex-col select-none"
+      style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)", WebkitTouchCallout: "none" }}
       data-testid="run-screen"
       data-kind={run.done ? "done" : kind}
+      onPointerDown={startHold}
+      onPointerMove={moveHold}
+      onPointerUp={cancelHold}
+      onPointerCancel={cancelHold}
+      onPointerLeave={cancelHold}
+      onContextMenu={(e) => e.preventDefault()}
     >
+      {holding && (
+        <div className="absolute inset-x-0 top-0 z-10 flex justify-center pointer-events-none" style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }} data-testid="run-hold">
+          <div className="rounded-full bg-brand-soft text-sm font-medium px-4 py-2 overflow-hidden relative shadow-lg">
+            <span className="absolute inset-0 bg-brand hold-fill" style={{ animationDuration: `${HOLD_TO_EXIT_MS}ms` }} />
+            <span className="relative text-on-brand">Keep holding to exit</span>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 px-4 h-14 shrink-0">
         <button type="button" onClick={requestClose} aria-label={run.done ? "Close" : "Stop"} data-testid="run-stop" className={`${ui.icon} w-10 h-10`}>
           <I.x size={18} />
@@ -173,6 +223,7 @@ function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
                 <I.skipForward size={20} />
               </button>
             </div>
+            <p className="text-center text-xs text-faint mt-4">Hold anywhere to exit</p>
           </div>
         </>
       )}

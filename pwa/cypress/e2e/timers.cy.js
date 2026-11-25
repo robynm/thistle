@@ -1,4 +1,5 @@
-// Covers: creating, editing, duplicating and deleting timers; validation; unsaved-change guard.
+// Covers: creating, editing, duplicating and deleting timers; validation; unsaved-change guard;
+// reordering blocks and steps.
 import { simpleTimer } from "../support/builders.js";
 
 describe("timers", () => {
@@ -55,14 +56,39 @@ describe("timers", () => {
     cy.gotoApp({ timers: [simpleTimer("t1", "Legs")] });
     cy.tid("timer-card-edit").click();
     cy.tid("editor-name").clear().type("Leg day");
-    cy.tid("block-0-step-1-down").should("be.disabled");
-    cy.tid("block-0-step-1-up").click();
+    // Arrow keys on a grip move the item; ArrowDown on the last step does nothing.
+    cy.tid("block-0-step-1-grip").trigger("keydown", { key: "ArrowDown" });
+    cy.tid("block-0-step-1-grip").trigger("keydown", { key: "ArrowUp" });
     cy.tid("editor-save").click();
     cy.tid("timer-card-name").should("have.text", "Leg day");
     cy.readStore("timers").then(([t]) => {
       expect(t.id).to.eq("t1");
       expect(t.blocks[0].steps.map((s) => s.kind)).to.deep.eq(["rest", "work"]);
     });
+  });
+
+  it("reorders blocks by dragging", () => {
+    const t = simpleTimer("t1", "Legs");
+    t.blocks.push({ ...t.blocks[0], id: "t1_b2", name: "Second", steps: t.blocks[0].steps.map((s) => ({ ...s, id: `${s.id}2` })) });
+    t.blocks[0].name = "First";
+    cy.gotoApp({ timers: [t] });
+    cy.tid("timer-card-edit").click();
+    cy.tid("block-0-name").should("have.value", "First");
+    cy.dragGrip("block-1-grip", "block-0", { place: "before" });
+    cy.tid("block-0-name").should("have.value", "Second");
+    cy.tid("block-1-name").should("have.value", "First");
+    cy.tid("editor-save").click();
+    cy.readStore("timers").then(([saved]) => {
+      expect(saved.blocks.map((b) => b.name)).to.deep.eq(["Second", "First"]);
+    });
+  });
+
+  it("reorders steps by dragging", () => {
+    cy.gotoApp({ timers: [simpleTimer("t1", "Legs")] });
+    cy.tid("timer-card-edit").click();
+    cy.dragGrip("block-0-step-0-grip", "block-0-step-1", { place: "after" });
+    cy.tid("block-0-step-0-kind-rest").should("have.attr", "aria-checked", "true");
+    cy.tid("block-0-step-1-kind-work").should("have.attr", "aria-checked", "true");
   });
 
   it("asks before discarding unsaved changes", () => {

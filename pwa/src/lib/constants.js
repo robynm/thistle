@@ -4,6 +4,8 @@
 // --- Storage keys ---------------------------------------------
 export const STORAGE_KEYS = {
   timers: "thistle:timers:v1",
+  lists: "thistle:lists:v1",
+  listsOpen: "thistle:listsOpen:v1",
   history: "thistle:history:v1",
   quick: "thistle:quick:v1",
   sound: "thistle:sound:v1",
@@ -35,6 +37,8 @@ export const GET_READY_SECONDS = 5;
 export const MIN_HISTORY_SECONDS = 10;
 // Pressing Back this far into a step restarts it; earlier, it goes to the previous step.
 export const BACK_RESTART_MS = 3000;
+// How long to press the run screen's background to leave it without a confirm.
+export const HOLD_TO_EXIT_MS = 1000;
 export const MAX_STEP_SECONDS = 99 * 60 + 59;
 export const MAX_REPS = 99;
 

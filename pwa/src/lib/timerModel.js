@@ -1,9 +1,12 @@
 // The timer data model and the pure functions the editor, cards and runner share.
 //
 // A timer is a list of blocks; each block is a list of steps repeated `reps` times:
-//   { id, name, createdAt, updatedAt,
+//   { id, name, listId, createdAt, updatedAt,
 //     blocks: [{ id, name, reps, steps: [{ id, kind, name, seconds }] }] }
 // `kind` is one of STEP_KINDS. Array order is the run order.
+//
+// Lists are folders: { id, name, createdAt }. A timer is in at most one list
+// (`listId`), or none (null), which shows it at the top of the Timers tab.
 import { GET_READY_SECONDS, KIND_LABEL, MAX_REPS, MAX_STEP_SECONDS, STEP_KINDS } from "./constants.js";
 
 // --- Ids and builders -----------------------------------------
@@ -16,7 +19,7 @@ export const newBlock = () => ({ id: uid("b"), name: "", reps: 1, steps: [newSte
 export function newTimer() {
   const block = newBlock();
   block.reps = 8;
-  return { id: uid("t"), name: "", blocks: [block], createdAt: null, updatedAt: null };
+  return { id: uid("t"), name: "", listId: null, blocks: [block], createdAt: null, updatedAt: null };
 }
 
 // A one-block timer built from the Quick start fields. Not saved to the timers list.
@@ -96,9 +99,19 @@ export function cleanTimer(t) {
   return {
     id: t.id,
     name: typeof t.name === "string" ? t.name : "",
+    listId: typeof t.listId === "string" ? t.listId : null,
     blocks,
     createdAt: typeof t.createdAt === "string" ? t.createdAt : null,
     updatedAt: typeof t.updatedAt === "string" ? t.updatedAt : null,
+  };
+}
+
+export function cleanList(l) {
+  if (!l || typeof l !== "object" || typeof l.id !== "string") return null;
+  return {
+    id: l.id,
+    name: typeof l.name === "string" ? l.name : "",
+    createdAt: typeof l.createdAt === "string" ? l.createdAt : null,
   };
 }
 
@@ -116,4 +129,43 @@ export function cleanHistoryEntry(h) {
     progress: Math.min(1, Math.max(0, Number(h.progress) || 0)),
     completed: Boolean(h.completed),
   };
+}
+
+// --- Lists ----------------------------------------------------
+// The timers array is kept grouped: timers with no list first, then each list's
+// timers in list order. Order within a group is the user's order.
+
+// Clears listIds that point at a list that no longer exists, then groups. Stable, so
+// order within each group is kept; a timer put at the front of the array lands first
+// in its group.
+export function groupTimers(timers, lists) {
+  const rank = new Map(lists.map((l, i) => [l.id, i + 1]));
+  return timers
+    .map((t) => (t.listId && !rank.has(t.listId) ? { ...t, listId: null } : t))
+    .map((t, i) => ({ t, i, r: t.listId ? rank.get(t.listId) : 0 }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.t);
+}
+
+// Moves timer `id` into `listId` (null for no list) at position `index` among that
+// list's other timers. An index past the end appends.
+export function moveTimer(timers, lists, id, listId, index) {
+  const moving = timers.find((t) => t.id === id);
+  if (!moving) return timers;
+  const rest = timers.filter((t) => t.id !== id);
+  const inTarget = rest.filter((t) => t.listId === listId);
+  const at = Math.min(Math.max(0, index), inTarget.length);
+  const out = [...rest];
+  const before = inTarget[at];
+  const pos = before ? out.indexOf(before) : (inTarget.length ? out.indexOf(inTarget[inTarget.length - 1]) + 1 : out.length);
+  out.splice(pos, 0, { ...moving, listId });
+  return groupTimers(out, lists);
+}
+
+// Moves the array item at `from` so it ends up at index `to` of the result.
+export function moveItem(arr, from, to) {
+  const out = [...arr];
+  const [item] = out.splice(from, 1);
+  out.splice(to, 0, item);
+  return out;
 }

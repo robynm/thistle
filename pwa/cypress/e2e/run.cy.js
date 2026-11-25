@@ -1,5 +1,5 @@
-// Covers: running a timer step by step, pause, skip, back, finishing, stopping early,
-// and what gets saved to History. Time is driven with cy.clock / cy.tick.
+// Covers: running a timer step by step, pause, skip, back, finishing, stopping early
+// (× and hold-to-exit), and what gets saved to History. Time is driven with cy.clock / cy.tick.
 import { simpleTimer } from "../support/builders.js";
 
 // Sequence for this timer: get ready 5s, work 10s, rest 5s, work 10s (the trailing rest is dropped).
@@ -81,6 +81,34 @@ describe("run", () => {
     });
     cy.tab("history");
     cy.tid("history-entry-status").should("contain", "Partial · 48%");
+  });
+
+  it("exits on a 1 second hold, without asking, and saves a partial run", () => {
+    cy.tick(5000 + 12000);
+    cy.tid("run-screen").trigger("pointerdown", { button: 0, position: "left" });
+    cy.tid("run-hold").should("exist");
+    cy.tick(1000);
+    cy.tid("run-screen").should("not.exist");
+    cy.readStore("history").then((h) => {
+      // The workout kept running during the hold.
+      expect(h[0]).to.include({ completed: false, elapsedSec: 13 });
+    });
+  });
+
+  it("cancels the hold if you let go early", () => {
+    cy.tid("run-screen").trigger("pointerdown", { button: 0, position: "left" });
+    cy.tick(600);
+    cy.tid("run-screen").trigger("pointerup", { position: "left" });
+    cy.tid("run-hold").should("not.exist");
+    cy.tick(1000);
+    cy.tid("run-screen").should("exist");
+  });
+
+  it("doesn't start a hold from a button", () => {
+    cy.tid("run-pause").trigger("pointerdown", { button: 0 });
+    cy.tid("run-hold").should("not.exist");
+    cy.tick(1500);
+    cy.tid("run-screen").should("exist");
   });
 
   it("keeps running if you cancel the stop", () => {

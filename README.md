@@ -1,6 +1,6 @@
 # Thistle
 
-Thistle is an interval timer for workouts, installable on your phone as an app. You build timers out of blocks of work and rest steps, set how many times each block repeats, and save them to run again later. While a timer runs, the screen takes on the color of the current step, beeps count you down, and the screen stays awake. There is also a one-off Quick start timer and a History of past workouts. Everything is stored on your device, and the app works offline.
+Thistle is an interval timer for workouts, installable on your phone as an app. You build timers out of blocks of work and rest steps, set how many times each block repeats, and save them to run again later, organised into lists if you like. While a timer runs, the screen takes on the color of the current step, beeps count you down, and the screen stays awake. There is also a one-off Quick start timer and a History of past workouts. Everything is stored on your device, and the app works offline.
 
 ## What's where
 
@@ -65,7 +65,9 @@ Everything stays on the device, in the browser's localStorage:
 
 | Key | Contents |
 |---|---|
-| `thistle:timers:v1` | Saved timers |
+| `thistle:timers:v1` | Saved timers, in your order |
+| `thistle:lists:v1` | Lists, in your order |
+| `thistle:listsOpen:v1` | Which lists are expanded on this device |
 | `thistle:history:v1` | Past workouts |
 | `thistle:quick:v1` | Last Quick start values |
 | `thistle:sound:v1`, `thistle:theme:v1` | Per-device settings |
