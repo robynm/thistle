@@ -1,181 +1,107 @@
 @import "tailwindcss";
 
-/* Run-time classes such as `bg-${tone}-500` must be listed here so Tailwind generates them. */
-@source inline("{bg,text,border,ring}-{thistle,cream,ink,petal,leaf,plum,sky2}-{50,100,200,300,400,500,600,700,800,900}");
-@source inline("{bg,text,border}-{thistle,petal,leaf,plum,sky2}-500/{15,20,25,30}");
+/* Step-kind classes are built at runtime (`bg-${kind}`), so Tailwind must be told about them. */
+@source inline("{bg,text,border,stroke,fill}-{work,rest,warmup,cooldown,ready}{,-ink,-soft}");
 
-/* Every color reads a variable, so the [data-theme] blocks below restyle all utilities.
-   `card` is the surface for cards, menus and modals: white in Thistle, dark in Dusk.
-   Use `bg-card`, never `bg-white`, for surfaces. */
+/* Every color reads a variable, so the [data-theme="dusk"] block restyles all utilities.
+   Semantic names rather than numbered scales:
+     bg / surface / surface-2  page, grey blocks, pressed blocks
+     ink / muted / faint       text, secondary text, placeholders and icons at rest
+     line                      hairline dividers
+     brand / on-brand          sunflower yellow and the dark text that sits on it
+     <kind>, <kind>-ink, <kind>-soft
+                               a step kind's fill (graphics, fills with ink text on top),
+                               its readable text color on bg, and a faint tint */
 @theme inline {
-  --color-thistle-50: var(--thistle-50);
-  --color-thistle-100: var(--thistle-100);
-  --color-thistle-200: var(--thistle-200);
-  --color-thistle-300: var(--thistle-300);
-  --color-thistle-400: var(--thistle-400);
-  --color-thistle-500: var(--thistle-500);
-  --color-thistle-600: var(--thistle-600);
-  --color-thistle-700: var(--thistle-700);
-  --color-thistle-800: var(--thistle-800);
-  --color-thistle-900: var(--thistle-900);
-  --color-cream-50: var(--cream-50);
-  --color-cream-100: var(--cream-100);
-  --color-cream-200: var(--cream-200);
-  --color-cream-300: var(--cream-300);
-  --color-cream-400: var(--cream-400);
-  --color-cream-500: var(--cream-500);
-  --color-cream-600: var(--cream-600);
-  --color-cream-700: var(--cream-700);
-  --color-cream-800: var(--cream-800);
-  --color-cream-900: var(--cream-900);
-  --color-ink-50: var(--ink-50);
-  --color-ink-100: var(--ink-100);
-  --color-ink-200: var(--ink-200);
-  --color-ink-300: var(--ink-300);
-  --color-ink-400: var(--ink-400);
-  --color-ink-500: var(--ink-500);
-  --color-ink-600: var(--ink-600);
-  --color-ink-700: var(--ink-700);
-  --color-ink-800: var(--ink-800);
-  --color-ink-900: var(--ink-900);
-  --color-petal-50: var(--petal-50);
-  --color-petal-100: var(--petal-100);
-  --color-petal-200: var(--petal-200);
-  --color-petal-300: var(--petal-300);
-  --color-petal-400: var(--petal-400);
-  --color-petal-500: var(--petal-500);
-  --color-petal-600: var(--petal-600);
-  --color-petal-700: var(--petal-700);
-  --color-petal-800: var(--petal-800);
-  --color-petal-900: var(--petal-900);
-  --color-leaf-50: var(--leaf-50);
-  --color-leaf-100: var(--leaf-100);
-  --color-leaf-200: var(--leaf-200);
-  --color-leaf-300: var(--leaf-300);
-  --color-leaf-400: var(--leaf-400);
-  --color-leaf-500: var(--leaf-500);
-  --color-leaf-600: var(--leaf-600);
-  --color-leaf-700: var(--leaf-700);
-  --color-leaf-800: var(--leaf-800);
-  --color-leaf-900: var(--leaf-900);
-  --color-plum-50: var(--plum-50);
-  --color-plum-100: var(--plum-100);
-  --color-plum-200: var(--plum-200);
-  --color-plum-300: var(--plum-300);
-  --color-plum-400: var(--plum-400);
-  --color-plum-500: var(--plum-500);
-  --color-plum-600: var(--plum-600);
-  --color-plum-700: var(--plum-700);
-  --color-plum-800: var(--plum-800);
-  --color-plum-900: var(--plum-900);
-  --color-sky2-50: var(--sky2-50);
-  --color-sky2-100: var(--sky2-100);
-  --color-sky2-200: var(--sky2-200);
-  --color-sky2-300: var(--sky2-300);
-  --color-sky2-400: var(--sky2-400);
-  --color-sky2-500: var(--sky2-500);
-  --color-sky2-600: var(--sky2-600);
-  --color-sky2-700: var(--sky2-700);
-  --color-sky2-800: var(--sky2-800);
-  --color-sky2-900: var(--sky2-900);
-  --color-card: var(--card);
-  --shadow-brand: var(--sh-brand);
-  --shadow-card: var(--sh-card);
-  --shadow-card-hi: var(--sh-card-hi);
-  --shadow-pop: var(--sh-pop);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
+  --color-work: var(--work);
+  --color-work-ink: var(--work-ink);
+  --color-work-soft: var(--work-soft);
+  --color-rest: var(--rest);
+  --color-rest-ink: var(--rest-ink);
+  --color-rest-soft: var(--rest-soft);
+  --color-warmup: var(--warmup);
+  --color-warmup-ink: var(--warmup-ink);
+  --color-warmup-soft: var(--warmup-soft);
+  --color-cooldown: var(--cooldown);
+  --color-cooldown-ink: var(--cooldown-ink);
+  --color-cooldown-soft: var(--cooldown-soft);
+  --color-ready: var(--ready);
+  --color-ready-ink: var(--ready-ink);
+  --color-ready-soft: var(--ready-soft);
+  --font-sans: "Inter", -apple-system, system-ui, sans-serif;
+  --font-display: "Inter Tight", "Inter", -apple-system, system-ui, sans-serif;
 }
 
-/* Thistle: deep goldenrod on warm cream. */
+/* Thistle (light, default). */
 :root {
-  --thistle-50: #FFF8E1; --thistle-100: #FDECB5; --thistle-200: #FADB7D; --thistle-300: #F2C440; --thistle-400: #D9A512;
-  --thistle-500: #9A6F00; --thistle-600: #8A6300; --thistle-700: #6A4C00; --thistle-800: #503900; --thistle-900: #382800;
+  --bg: #FFFFFF;
+  --surface: #F4F3EF;
+  --surface-2: #EBE9E3;
+  --ink: #17160F;
+  --muted: #6F6B62;
+  --faint: #A8A49B;
+  --line: #ECEAE4;
+  --brand: #FFC629;
+  --on-brand: #17160F;
 
-  --cream-50: #FFFBF3; --cream-100: #F7EEDD; --cream-200: #EEDFC4; --cream-300: #E0CBA6; --cream-400: #C9AF86;
-  --cream-500: #A98E66; --cream-600: #85704F; --cream-700: #63533B; --cream-800: #4A3E2C; --cream-900: #32291D;
-
-  --ink-50: #F7F3EF; --ink-100: #E9E2DA; --ink-200: #D3C7BA; --ink-300: #B5A594; --ink-400: #948270;
-  --ink-500: #766452; --ink-600: #5E4D3E; --ink-700: #4A3B2F; --ink-800: #382C23; --ink-900: #261D17;
-
-  /* Work */
-  --petal-50: #FFF1F3; --petal-100: #FFDDE3; --petal-200: #FDB9C6; --petal-300: #F88DA2; --petal-400: #EE5F7E;
-  --petal-500: #D63A5F; --petal-600: #B4284C; --petal-700: #8E1F3C; --petal-800: #6B1830; --petal-900: #4A1022;
-  /* Rest */
-  --leaf-50: #EEF8F0; --leaf-100: #D3EED9; --leaf-200: #A9DDB5; --leaf-300: #76C68C; --leaf-400: #48A866;
-  --leaf-500: #2B8048; --leaf-600: #23703F; --leaf-700: #1C5833; --leaf-800: #164428; --leaf-900: #0F2F1C;
-  /* Warm-up */
-  --plum-50: #F7F0FA; --plum-100: #ECDDF3; --plum-200: #D9BCE7; --plum-300: #BF93D6; --plum-400: #A36BC2;
-  --plum-500: #874DA8; --plum-600: #6F3C8B; --plum-700: #57306D; --plum-800: #422552; --plum-900: #2D1938;
-  /* Cool-down */
-  --sky2-50: #EEF6FC; --sky2-100: #D4E9F8; --sky2-200: #A9D2F0; --sky2-300: #74B4E4; --sky2-400: #4594D1;
-  --sky2-500: #2A78B8; --sky2-600: #20609A; --sky2-700: #1B4C7A; --sky2-800: #163A5C; --sky2-900: #0F283F;
-
-  --card: #FFFFFF;
-  --sh-brand: 0 12px 32px -12px rgba(154, 111, 0, 0.45);
-  --sh-card: 0 4px 16px -6px rgba(56, 44, 35, 0.10);
-  --sh-card-hi: 0 18px 36px -16px rgba(56, 44, 35, 0.20);
-  --sh-pop: 0 8px 24px -8px rgba(56, 44, 35, 0.18);
-  --wash: radial-gradient(circle at 90% -10%, rgba(217, 165, 18, 0.12), transparent 40%),
-          radial-gradient(circle at -10% 110%, rgba(135, 77, 168, 0.08), transparent 45%);
+  --work: #FF5E4F;      --work-ink: #C93A2D;     --work-soft: #FFEDEA;
+  --rest: #2FCB7E;      --rest-ink: #17804B;     --rest-soft: #E3F8EC;
+  --warmup: #A08CFF;    --warmup-ink: #6A4FE0;   --warmup-soft: #EFEBFF;
+  --cooldown: #45B3FF;  --cooldown-ink: #1A6FB0; --cooldown-soft: #E4F3FF;
+  --ready: #FFC629;     --ready-ink: #8A6500;    --ready-soft: #FFF6D9;
   color-scheme: light;
 }
 
-/* Dusk: dark. Scales are flipped so 50 stays "background tint" and 600–700 stays
-   "text on a tint"; the 500 fills keep white text readable. */
+/* Dusk (dark). Fills stay the same; the -ink and -soft variants are re-tuned for a dark page. */
 [data-theme="dusk"] {
-  --thistle-50: #2B2410; --thistle-100: #42361A; --thistle-200: #5E4A15; --thistle-300: #85680F; --thistle-400: #B08A10;
-  --thistle-500: #9A6F00; --thistle-600: #E0B43A; --thistle-700: #F2CC5E; --thistle-800: #F8DD8E; --thistle-900: #FCEDC0;
+  --bg: #131210;
+  --surface: #1F1E1A;
+  --surface-2: #2A2924;
+  --ink: #F4F2EC;
+  --muted: #A09C92;
+  --faint: #6B675F;
+  --line: #2A2925;
 
-  --cream-50: #16131C; --cream-100: #2A2533; --cream-200: #3A3445; --cream-300: #4D4659; --cream-400: #645C70;
-  --cream-500: #7E7689; --cream-600: #9B93A5; --cream-700: #BAB3C2; --cream-800: #D6D0DC; --cream-900: #EEEAF2;
-
-  --ink-50: #24211D; --ink-100: #322E29; --ink-200: #47423B; --ink-300: #5E584F; --ink-400: #8A8276;
-  --ink-500: #A39B8F; --ink-600: #B9B1A4; --ink-700: #CFC6B8; --ink-800: #E6DFD4; --ink-900: #F5F0E8;
-
-  --petal-50: #2E1720; --petal-100: #4A2232; --petal-200: #6E2E46; --petal-300: #96395A; --petal-400: #C04A6F;
-  --petal-500: #C2304F; --petal-600: #F48AA3; --petal-700: #F9B3C3; --petal-800: #FCD2DC; --petal-900: #FEE8ED;
-  --leaf-50: #13261A; --leaf-100: #1C3A27; --leaf-200: #255236; --leaf-300: #2F6E47; --leaf-400: #3C8E5B;
-  --leaf-500: #2B8048; --leaf-600: #7FCF98; --leaf-700: #A9E0B8; --leaf-800: #CDEFD6; --leaf-900: #E8F8EC;
-  --plum-50: #241A2B; --plum-100: #362643; --plum-200: #4C335F; --plum-300: #66437F; --plum-400: #8459A3;
-  --plum-500: #874DA8; --plum-600: #C79BE0; --plum-700: #DABCEB; --plum-800: #EAD7F4; --plum-900: #F6EDFA;
-  --sky2-50: #132230; --sky2-100: #1B3348; --sky2-200: #244765; --sky2-300: #2E5E86; --sky2-400: #3A78AA;
-  --sky2-500: #2A78B8; --sky2-600: #85BDEA; --sky2-700: #ADD3F2; --sky2-800: #CFE5F7; --sky2-900: #E9F3FC;
-
-  --card: #201C27;
-  --sh-brand: 0 12px 32px -12px rgba(224, 180, 58, 0.35);
-  --sh-card: 0 4px 16px -6px rgba(0, 0, 0, 0.45);
-  --sh-card-hi: 0 18px 36px -16px rgba(0, 0, 0, 0.6);
-  --sh-pop: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
-  --wash: radial-gradient(circle at 90% -10%, rgba(224, 180, 58, 0.10), transparent 40%),
-          radial-gradient(circle at -10% 110%, rgba(135, 77, 168, 0.14), transparent 45%);
+  --work-ink: #FF8A7E;     --work-soft: #3A1E1B;
+  --rest-ink: #5FDC9B;     --rest-soft: #16301F;
+  --warmup-ink: #B8A9FF;   --warmup-soft: #27213D;
+  --cooldown-ink: #7CC8FF; --cooldown-soft: #172A3A;
+  --ready-ink: #FFD45C;    --ready-soft: #3A3115;
   color-scheme: dark;
 }
 
-html, body, #root { height: 100%; margin: 0; padding: 0; background: var(--cream-50); }
+html, body, #root { height: 100%; margin: 0; padding: 0; background: var(--bg); }
 body {
-  font-family: "Nunito", -apple-system, system-ui, sans-serif;
-  color: var(--ink-800);
+  font-family: var(--font-sans);
+  color: var(--ink);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
 }
-.font-display { font-family: "Fraunces", Georgia, serif; font-optical-sizing: auto; }
-.thistle-wash { background-image: var(--wash); }
 .tabular { font-variant-numeric: tabular-nums; }
 
 @layer base {
   header { padding-top: env(safe-area-inset-top); }
   main { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
   input, select, button { font: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 }
 
-@keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-.fade-up { animation: fade-up .45s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fade-up .3s cubic-bezier(.2,.7,.2,1) both; }
 
-@keyframes bloom { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
-.bloom { animation: bloom .55s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes pop { 0% { transform: scale(.7); opacity: 0; } 70% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); } }
+.pop { animation: pop .45s cubic-bezier(.34,1.56,.64,1) both; }
 
-@media (hover: hover) {
-  .card-lift { transition: transform .2s, box-shadow .2s; }
-  .card-lift:hover { transform: translateY(-3px); box-shadow: var(--sh-card-hi); }
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .pop { animation: none; }
 }
-
-* { scrollbar-width: thin; scrollbar-color: rgba(154, 111, 0, 0.35) transparent; }

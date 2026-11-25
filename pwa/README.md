@@ -47,9 +47,9 @@ A run is saved to History when it finishes, or when you stop it after at least 1
 
 ## Theming
 
-Every color is a CSS variable on `:root` (the Thistle theme). `[data-theme="dusk"]` redefines the same variables for the dark theme, so no `dark:` variants are needed. Card and modal surfaces use `bg-card` rather than `bg-white`, so they turn dark in Dusk. Class names built at runtime, such as `` `bg-${tone}-500` ``, must be covered by the `@source inline(...)` lines at the top of `styles.css`.
+The visual rules are in [DESIGN.md](../DESIGN.md) at the repo root. In code, every color is a semantic CSS variable on `:root` (the light Thistle theme). `[data-theme="dusk"]` redefines the same variables for the dark theme, so no `dark:` variants are needed. Use the semantic utilities (`bg-surface`, `text-muted`, `bg-brand text-on-brand`, …), and use `lib/ui.js` for buttons and inputs.
 
-Step-kind colors: Work = `petal`, Rest = `leaf`, Warm-up = `plum`, Cool-down = `sky2`, Get ready = `thistle`.
+Each step kind's id is also its color name: `bg-work`, `text-rest-ink`, `bg-cooldown-soft`, and `ready` for get-ready. Those classes are built at runtime, so they are listed in the `@source inline(...)` line at the top of `styles.css`.
 
 ## Offline
 

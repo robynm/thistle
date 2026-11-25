@@ -15,19 +15,14 @@ export const STORAGE_KEYS = {
 export const BACKUP_FORMAT = "thistle-backup-v1";
 
 // --- Step kinds -----------------------------------------------
-// Each kind has a fixed accent color used on cards, chips and the run screen.
+// Each kind's id is also its color name in styles.css (`bg-work`, `text-rest-ink`, …).
 // "ready" is the get-ready countdown the runner adds; it can't be chosen in the editor.
 export const STEP_KINDS = [
-  { id: "work", label: "Work", tone: "petal" },
-  { id: "rest", label: "Rest", tone: "leaf" },
-  { id: "warmup", label: "Warm-up", tone: "plum" },
-  { id: "cooldown", label: "Cool-down", tone: "sky2" },
+  { id: "work", label: "Work" },
+  { id: "rest", label: "Rest" },
+  { id: "warmup", label: "Warm-up" },
+  { id: "cooldown", label: "Cool-down" },
 ];
-
-export const KIND_TONE = {
-  ready: "thistle",
-  ...Object.fromEntries(STEP_KINDS.map((k) => [k.id, k.tone])),
-};
 
 export const KIND_LABEL = {
   ready: "Get ready",

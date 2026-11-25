@@ -7,10 +7,11 @@ Thistle is an interval timer for workouts, installable on your phone as an app. 
 ```
 thistle/
 ├── README.md              ← this file
+├── DESIGN.md              ← Thistle's colors, type and screen rules
 ├── package.json           ← root command proxy; scripts run inside pwa/
 ├── release.sh             ← one-command release: build, commit, tag vN, push
 ├── thistle-mark.svg       ← source brand mark (icons are generated from it)
-├── project-template/      ← DESIGN.md and SCAFFOLDING.md: the style and structure guides
+├── project-template/      ← the general style and structure templates this project started from
 ├── .github/workflows/
 │   ├── e2e.yml            ← e2e suite on every pull request
 │   ├── deploy.yml         ← on push to main: e2e gate, then build + publish to Pages

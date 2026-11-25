@@ -1,24 +1,23 @@
 import { useState } from "react";
 import { useBackButton } from "../lib/backNav.js";
 import { I } from "../lib/icons.jsx";
-import { BrandMark } from "./BrandMark.jsx";
+import { ui } from "../lib/ui.js";
 
-// `action` is the current view's one header button, if it has one.
-function AppHeader({ action, theme, onToggleTheme, onOpenBackup }) {
+// Shows the current view's title. `action` is that view's one header button, if any.
+function AppHeader({ title, subtitle, action, theme, onToggleTheme, onOpenBackup }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
   useBackButton(menuOpen, closeMenu);
 
-  const nextTheme = theme === "dusk" ? { label: "Switch to Thistle", Icon: I.sun } : { label: "Switch to Dusk", Icon: I.moon };
-  const row = "w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-ink-700 active:bg-cream-50 text-left";
+  const nextTheme = theme === "dusk" ? { label: "Light theme", Icon: I.sun } : { label: "Dark theme", Icon: I.moon };
+  const row = "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-ink active:bg-surface text-left";
 
   return (
-    <header className="sticky top-0 z-30 bg-card border-b-2 border-cream-100 shadow-card">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
-        <BrandMark size={36} className="bloom" />
+    <header className="sticky top-0 z-30 bg-bg/95 backdrop-blur">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <h1 className="font-display font-bold text-2xl sm:text-3xl tracking-tight text-ink-900 leading-none">Thistle</h1>
-          <p className="hidden sm:block text-[10px] font-bold uppercase tracking-[0.25em] text-ink-400 mt-1">Work, rest, repeat</p>
+          <h1 className="font-display font-bold text-[28px] tracking-tight leading-tight text-ink" data-testid="view-title">{title}</h1>
+          {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
         </div>
         {action}
         <div className="relative">
@@ -28,20 +27,19 @@ function AppHeader({ action, theme, onToggleTheme, onOpenBackup }) {
             aria-label="Menu"
             aria-expanded={menuOpen}
             data-testid="menu-button"
-            className="w-9 h-9 rounded-full bg-cream-50 border-2 border-cream-100 text-ink-600 flex items-center justify-center active:scale-90 transition-transform"
+            className={`${ui.icon} w-9 h-9 bg-transparent`}
           >
-            <I.more size={18} />
+            <I.more size={20} />
           </button>
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={closeMenu} />
-              <div className="absolute right-0 top-full mt-2 z-50 bg-card rounded-2xl shadow-card-hi border-2 border-cream-100 min-w-[200px] overflow-hidden fade-up" data-testid="menu">
+              <div className="absolute right-0 top-full mt-1 z-50 bg-bg rounded-2xl shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] ring-1 ring-line min-w-[200px] overflow-hidden py-1 fade-up" data-testid="menu">
                 <button type="button" className={row} data-testid="menu-theme" onClick={() => { closeMenu(); onToggleTheme(); }}>
-                  <nextTheme.Icon size={15} /> {nextTheme.label}
+                  <nextTheme.Icon size={16} /> {nextTheme.label}
                 </button>
-                <div className="h-px bg-cream-100 mx-4" />
                 <button type="button" className={row} data-testid="menu-backup" onClick={() => { closeMenu(); onOpenBackup(); }}>
-                  <I.download size={15} /> Backup &amp; restore
+                  <I.download size={16} /> Backup &amp; restore
                 </button>
               </div>
             </>

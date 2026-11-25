@@ -14,10 +14,12 @@ import { TimersView } from "./components/TimersView.jsx";
 import { mergeById } from "./lib/backup.js";
 import { MIN_HISTORY_SECONDS, QUICK_DEFAULTS, STORAGE_KEYS } from "./lib/constants.js";
 import { isStandalone, useInstallPrompt } from "./lib/hooks.js";
+import { plural } from "./lib/format.js";
 import { I } from "./lib/icons.jsx";
 import { Log } from "./lib/log.js";
 import { unlockAudio } from "./lib/sound.js";
 import { lsGet, lsSet, requestPersistence } from "./lib/storage.js";
+import { ui } from "./lib/ui.js";
 import { cleanHistoryEntry, cleanTimer, newTimer, quickTimer, totalSeconds, uid } from "./lib/timerModel.js";
 import { SEED_TIMERS } from "./seed.js";
 
@@ -168,26 +170,28 @@ function App() {
   }
 
   const headerAction = view === "timers" && (
-    <button
-      type="button"
-      onClick={() => setEditor({ timer: newTimer(), isNew: true })}
-      data-testid="timers-new"
-      className="inline-flex items-center gap-1.5 bg-thistle-500 text-white rounded-full px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.1em] shadow-pop active:scale-95 transition-transform"
-    >
-      <I.plus size={12} /> New
+    <button type="button" onClick={() => setEditor({ timer: newTimer(), isNew: true })} data-testid="timers-new" className={`${ui.primary} py-2 pl-3`}>
+      <I.plus size={16} /> New
     </button>
   );
+  const titles = {
+    timers: { title: "Timers", subtitle: timers.length ? plural(timers.length, "saved timer") : null },
+    quick: { title: "Quick start", subtitle: "Work, rest, repeat. No saving needed." },
+    history: { title: "History", subtitle: null },
+  };
 
   return (
-    <div className="min-h-full thistle-wash">
+    <div className="min-h-full">
       {install.canPrompt && !bannerHidden && <InstallBanner onInstall={install.prompt} onDismiss={() => setBannerHidden(true)} />}
       <AppHeader
+        title={titles[view].title}
+        subtitle={titles[view].subtitle}
         action={headerAction}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === "dusk" ? "thistle" : "dusk"))}
         onOpenBackup={() => setBackupOpen(true)}
       />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-32">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-2 pb-32">
         {view === "timers" && (
           <TimersView timers={timers} onRun={(t) => startRun(t, "timer")} onEdit={(t) => setEditor({ timer: t, isNew: false })} />
         )}

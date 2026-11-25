@@ -8,8 +8,8 @@ import sharp from "sharp";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "..", "public", "icons");
-const BRAND = "#9A6F00";
-const GLYPH = "#FFFFFF";
+const BRAND = "#FFC629";
+const GLYPH = "#17160F";
 
 const mark = readFileSync(join(here, "..", "..", "thistle-mark.svg"), "utf8");
 const inner = mark.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
