@@ -12,6 +12,7 @@ import { useBackButton } from "../lib/backNav.js";
 import { fmtClock, fmtShort } from "../lib/format.js";
 import { useBodyScrollLock, useWakeLock } from "../lib/hooks.js";
 import { I } from "../lib/icons.jsx";
+import { useLockScreen } from "../lib/lockScreen.js";
 import { useRunner } from "../lib/runner.js";
 import { flatten } from "../lib/timerModel.js";
 import { ui } from "../lib/ui.js";
@@ -43,7 +44,7 @@ function Ring({ kind, fraction, children }) {
   );
 }
 
-function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
+function RunScreen({ timer, soundOn, lockMode, onToggleSound, onFinish, onClose }) {
   useBodyScrollLock();
   const segments = useMemo(() => flatten(timer), [timer]);
   const [summary, setSummary] = useState(null);
@@ -56,6 +57,7 @@ function RunScreen({ timer, soundOn, onToggleSound, onFinish, onClose }) {
     },
   });
   useWakeLock(!run.done);
+  useLockScreen(lockMode, timer, run);
 
   const exit = (how) => {
     onFinish({ ...run.result(), exit: how });

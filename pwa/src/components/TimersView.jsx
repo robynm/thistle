@@ -15,7 +15,7 @@ import { DragGrip } from "./DragGrip.jsx";
 import { ListHeader } from "./ListHeader.jsx";
 import { TimerCard } from "./TimerCard.jsx";
 
-function TimersView({ timers, lists, openLists, onToggleList, onRun, onEdit, onEditList, onNewList, onMoveTimer, onReorderLists }) {
+function TimersView({ timers, completedCounts, lists, openLists, onToggleList, onRun, onEdit, onEditList, onNewList, onMoveTimer, onReorderLists }) {
   const ref = useRef(null);
   const [draggingLists, setDraggingLists] = useState(false);
   const isOpen = (listId) => listId === null || (!draggingLists && openLists.includes(listId));
@@ -57,6 +57,7 @@ function TimersView({ timers, lists, openLists, onToggleList, onRun, onEdit, onE
     <div key={t.id} data-timer-item data-sort-key={t.id}>
       <TimerCard
         timer={t}
+        completed={completedCounts.get(t.id) ?? 0}
         onRun={() => onRun(t)}
         onEdit={() => onEdit(t)}
         grip={<DragGrip handleProps={timerSort.handleProps} label={`Move ${t.name || "timer"}`} testId="timer-card-grip" />}

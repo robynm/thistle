@@ -30,6 +30,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,svg,ico,woff,woff2}"],
+        // Relays the run notification's Pause/Skip buttons to the page.
+        importScripts: ["notify-sw.js"],
         runtimeCaching: [{
           urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
           handler: "StaleWhileRevalidate",

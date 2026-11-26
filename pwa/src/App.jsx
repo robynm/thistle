@@ -1,11 +1,12 @@
 // Root component. Owns the current view (there is no router), every persisted
 // collection, which overlays are open, and the theme. Views get data and callbacks.
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppHeader } from "./components/AppHeader.jsx";
 import { BackupModal } from "./components/BackupModal.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
 import { HistoryView } from "./components/HistoryView.jsx";
 import { ListModal } from "./components/ListModal.jsx";
+import { LockScreenModal } from "./components/LockScreenModal.jsx";
 import { InstallBanner } from "./components/InstallBanner.jsx";
 import { QuickView } from "./components/QuickView.jsx";
 import { RunScreen } from "./components/RunScreen.jsx";
@@ -16,6 +17,7 @@ import { mergeById } from "./lib/backup.js";
 import { MIN_HISTORY_SECONDS, QUICK_DEFAULTS, STORAGE_KEYS } from "./lib/constants.js";
 import { isStandalone, useInstallPrompt } from "./lib/hooks.js";
 import { plural } from "./lib/format.js";
+import { LOCK_MODES, primeLockScreen } from "./lib/lockScreen.js";
 import { I } from "./lib/icons.jsx";
 import { Log } from "./lib/log.js";
 import { unlockAudio } from "./lib/sound.js";
@@ -66,6 +68,10 @@ function App() {
   const [history, setHistory] = useState(loadHistory);
   const [quick, setQuick] = useState(loadQuick);
   const [soundOn, setSoundOn] = useState(() => lsGet(STORAGE_KEYS.sound, true) !== false);
+  const [lockMode, setLockMode] = useState(() => {
+    const m = lsGet(STORAGE_KEYS.lockScreen, "off");
+    return LOCK_MODES.includes(m) ? m : "off";
+  });
   const [theme, setTheme] = useState(() => (lsGet(STORAGE_KEYS.theme, "thistle") === "dusk" ? "dusk" : "thistle"));
   const [showSplash, setShowSplash] = useState(() => !isStandalone() && !lsGet(STORAGE_KEYS.splashSeen, false));
   const [bannerHidden, setBannerHidden] = useState(false);
@@ -73,6 +79,7 @@ function App() {
   const [listEditor, setListEditor] = useState(null); // { list, isNew }
   const [run, setRun] = useState(null); // { timer, source, startedAt }
   const [backupOpen, setBackupOpen] = useState(false);
+  const [lockOpen, setLockOpen] = useState(false);
   const install = useInstallPrompt();
 
   useEffect(() => {
@@ -87,6 +94,7 @@ function App() {
   useEffect(() => { lsSet(STORAGE_KEYS.history, history); }, [history]);
   useEffect(() => { lsSet(STORAGE_KEYS.quick, quick); }, [quick]);
   useEffect(() => { lsSet(STORAGE_KEYS.sound, soundOn); }, [soundOn]);
+  useEffect(() => { lsSet(STORAGE_KEYS.lockScreen, lockMode); }, [lockMode]);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     lsSet(STORAGE_KEYS.theme, theme);
@@ -158,12 +166,20 @@ function App() {
     setTimers((ts) => groupTimers(ts, next));
   };
 
+  // Finished runs per timer, for the badge on each card. Runs stopped early don't count.
+  const completedCounts = useMemo(() => {
+    const out = new Map();
+    for (const h of history) if (h.completed && h.timerId) out.set(h.timerId, (out.get(h.timerId) ?? 0) + 1);
+    return out;
+  }, [history]);
+
   const toggleList = (id) => setOpenLists((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
 
   // --- Runs -----------------------------------------------------
   // Called from the tap that starts the run, so audio can be unlocked inside the gesture.
   const startRun = (timer, source) => {
     if (soundOn) unlockAudio();
+    primeLockScreen(lockMode);
     setRun({ timer, source, startedAt: new Date().toISOString() });
   };
 
@@ -248,11 +264,13 @@ function App() {
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === "dusk" ? "thistle" : "dusk"))}
         onOpenBackup={() => setBackupOpen(true)}
+        onOpenLockScreen={() => setLockOpen(true)}
       />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-2 pb-32">
         {view === "timers" && (
           <TimersView
             timers={timers}
+            completedCounts={completedCounts}
             lists={lists}
             openLists={openLists}
             onToggleList={toggleList}
@@ -283,6 +301,7 @@ function App() {
       {backupOpen && (
         <BackupModal timers={timers} lists={lists} history={history} quick={quick} onImport={importBackup} onClose={() => setBackupOpen(false)} />
       )}
+      {lockOpen && <LockScreenModal mode={lockMode} onChange={setLockMode} onClose={() => setLockOpen(false)} />}
       {listEditor && (
         <ListModal
           list={listEditor.list}
@@ -297,6 +316,7 @@ function App() {
           key={run.startedAt}
           timer={run.timer}
           soundOn={soundOn}
+          lockMode={lockMode}
           onToggleSound={() => setSoundOn((s) => !s)}
           onFinish={recordRun}
           onClose={() => setRun(null)}

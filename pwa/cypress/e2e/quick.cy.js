@@ -1,4 +1,4 @@
-// Covers: Quick start fields, remembering them, and logging a quick run to History.
+// Covers: Quick start fields, typing durations as digits, remembering them, and logging a quick run to History.
 
 describe("quick start", () => {
   it("remembers its values", () => {
@@ -29,5 +29,32 @@ describe("quick start", () => {
     cy.readStore("history").then(([h]) => {
       expect(h).to.include({ source: "quick", timerId: null, timerName: "Quick start", completed: true, elapsedSec: 15 });
     });
+  });
+
+  it("fills typed digits from the right, like a microwave", () => {
+    cy.gotoApp();
+    cy.tab("quick");
+    cy.tid("quick-work").focus().type("1");
+    cy.tid("quick-work").should("have.value", "0:01");
+    cy.tid("quick-work").type("3");
+    cy.tid("quick-work").should("have.value", "0:13");
+    cy.tid("quick-work").type("0{enter}");
+    cy.tid("quick-work").should("have.value", "1:30");
+    cy.readStore("quick").its("work").should("eq", 90);
+
+    // Seconds over 59 roll into minutes when saved.
+    cy.tid("quick-rest").focus().type("90{enter}");
+    cy.tid("quick-rest").should("have.value", "1:30");
+
+    // Backspace drops the last digit.
+    cy.tid("quick-work").focus().type("245{backspace}{enter}");
+    cy.tid("quick-work").should("have.value", "0:24");
+
+    // Leaving without typing, or pressing Escape, keeps the old value.
+    cy.tid("quick-work").focus().blur();
+    cy.tid("quick-work").should("have.value", "0:24");
+    cy.tid("quick-work").focus().type("5{esc}");
+    cy.tid("quick-work").should("have.value", "0:24");
+    cy.readStore("quick").its("work").should("eq", 24);
   });
 });

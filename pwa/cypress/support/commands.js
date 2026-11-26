@@ -6,6 +6,7 @@ const KEYS = {
   history: "thistle:history:v1",
   quick: "thistle:quick:v1",
   sound: "thistle:sound:v1",
+  lockScreen: "thistle:lockScreen:v1",
   theme: "thistle:theme:v1",
   splashSeen: "thistle:splashSeen:v1",
 };
