@@ -13,8 +13,9 @@ describe("navigation", () => {
   it("switches between tabs", () => {
     cy.gotoApp();
     cy.tid("timers-empty").should("exist");
-    cy.tab("quick");
-    cy.tid("quick-view").should("exist");
+    cy.tab("counters");
+    cy.tid("counters-empty").should("exist");
+    cy.tid("counters-new").should("exist");
     cy.tid("timers-new").should("not.exist");
     cy.tab("history");
     cy.tid("history-empty").should("exist");

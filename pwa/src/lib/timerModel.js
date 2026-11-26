@@ -132,13 +132,14 @@ export function cleanHistoryEntry(h) {
 }
 
 // --- Lists ----------------------------------------------------
-// The timers array is kept grouped: timers with no list first, then each list's
-// timers in list order. Order within a group is the user's order.
+// Used for timers and for counters: anything with a `listId`. The array is kept
+// grouped: items with no list first, then each list's items in list order. Order
+// within a group is the user's order.
 
 // Clears listIds that point at a list that no longer exists, then groups. Stable, so
-// order within each group is kept; a timer put at the front of the array lands first
+// order within each group is kept; an item put at the front of the array lands first
 // in its group.
-export function groupTimers(timers, lists) {
+export function groupByList(timers, lists) {
   const rank = new Map(lists.map((l, i) => [l.id, i + 1]));
   return timers
     .map((t) => (t.listId && !rank.has(t.listId) ? { ...t, listId: null } : t))
@@ -147,9 +148,9 @@ export function groupTimers(timers, lists) {
     .map((x) => x.t);
 }
 
-// Moves timer `id` into `listId` (null for no list) at position `index` among that
-// list's other timers. An index past the end appends.
-export function moveTimer(timers, lists, id, listId, index) {
+// Moves item `id` into `listId` (null for no list) at position `index` among that
+// list's other items. An index past the end appends.
+export function moveToList(timers, lists, id, listId, index) {
   const moving = timers.find((t) => t.id === id);
   if (!moving) return timers;
   const rest = timers.filter((t) => t.id !== id);
@@ -159,7 +160,7 @@ export function moveTimer(timers, lists, id, listId, index) {
   const before = inTarget[at];
   const pos = before ? out.indexOf(before) : (inTarget.length ? out.indexOf(inTarget[inTarget.length - 1]) + 1 : out.length);
   out.splice(pos, 0, { ...moving, listId });
-  return groupTimers(out, lists);
+  return groupByList(out, lists);
 }
 
 // Moves the array item at `from` so it ends up at index `to` of the result.

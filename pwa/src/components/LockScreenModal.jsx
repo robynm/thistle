@@ -56,6 +56,11 @@ function LockScreenModal({ mode, onChange, onClose }) {
         })}
       </div>
       {error && <p className="text-sm text-work-ink mt-3" role="alert" data-testid="lockscreen-error">{error}</p>}
+      {notifySupported() && (
+        <p className="text-xs text-muted mt-4 px-1">
+          This setting is for running timers. To keep a counter on the lock screen, open it and turn on Show on lock screen.
+        </p>
+      )}
     </Modal>
   );
 }

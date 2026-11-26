@@ -35,3 +35,13 @@ export const historyEntry = (id, name, { completed = true, elapsedSec = 600, pro
 });
 
 export const list = (id, name) => ({ id, name, createdAt: T0 });
+
+export const counter = (id, name, { count = 0, color = "coral", listId = null } = {}) => ({
+  id,
+  name,
+  color,
+  count,
+  listId,
+  createdAt: T0,
+  updatedAt: T0,
+});

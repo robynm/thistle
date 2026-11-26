@@ -10,6 +10,11 @@ export const STORAGE_KEYS = {
   quick: "thistle:quick:v1",
   sound: "thistle:sound:v1",
   lockScreen: "thistle:lockScreen:v1",
+  counters: "thistle:counters:v1",
+  counterLists: "thistle:counterLists:v1",
+  counterListsOpen: "thistle:counterListsOpen:v1",
+  // Id of the counter shown in a notification while the app is hidden, or null.
+  lockCounter: "thistle:lockCounter:v1",
   theme: "thistle:theme:v1",
   splashSeen: "thistle:splashSeen:v1",
   log: "thistle:log:v1",
@@ -42,5 +47,18 @@ export const BACK_RESTART_MS = 3000;
 export const HOLD_TO_EXIT_MS = 1000;
 export const MAX_STEP_SECONDS = 99 * 60 + 59;
 export const MAX_REPS = 99;
+
+// --- Counters -------------------------------------------------
+// Counter colors reuse the step-kind palette, so they work in both themes. The stored
+// id is the color's own name, so step kinds can change without touching counters.
+// `token` is the kind whose classes it uses (`bg-${token}`, `text-${token}-ink`, …).
+export const COUNTER_COLORS = [
+  { id: "coral", label: "Coral", token: "work" },
+  { id: "green", label: "Green", token: "rest" },
+  { id: "violet", label: "Violet", token: "warmup" },
+  { id: "blue", label: "Blue", token: "cooldown" },
+  { id: "yellow", label: "Yellow", token: "ready" },
+];
+export const MAX_COUNT = 999999;
 
 export const QUICK_DEFAULTS = { work: 40, rest: 20, rounds: 8 };
