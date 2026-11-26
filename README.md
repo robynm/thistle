@@ -1,6 +1,6 @@
 # Thistle
 
-Thistle is an interval timer for workouts, installable on your phone as an app. You build timers out of blocks of work and rest steps, set how many times each block repeats, and save them to run again later, organised into lists if you like. While a timer runs, the screen takes on the color of the current step, beeps count you down, and the screen stays awake. There is also a one-off Quick start timer and a History of past workouts. Everything is stored on your device, and the app works offline.
+Thistle is an interval timer for workouts, installable on your phone as an app. You build timers out of blocks of work and rest steps, set how many times each block repeats, and save them to run again later, organised into lists if you like. While a timer runs, the screen takes on the color of the current step, beeps count you down, and the screen stays awake. There is also a one-off Quick start timer (the split button at the bottom of Timers), simple named counters with − and + buttons, and a History of past workouts. Everything is stored on your device, and the app works offline.
 
 ## What's where
 
@@ -70,7 +70,11 @@ Everything stays on the device, in the browser's localStorage:
 | `thistle:listsOpen:v1` | Which lists are expanded on this device |
 | `thistle:history:v1` | Past workouts |
 | `thistle:quick:v1` | Last Quick start values |
-| `thistle:sound:v1`, `thistle:theme:v1` | Per-device settings |
+| `thistle:counters:v1` | Counters and their counts, in your order |
+| `thistle:counterLists:v1` | Counter lists, in your order (separate from timer lists) |
+| `thistle:counterListsOpen:v1` | Which counter lists are expanded on this device |
+| `thistle:sound:v1`, `thistle:theme:v1`, `thistle:lockScreen:v1` | Per-device settings |
+| `thistle:lockCounter:v1` | Which counter is shown in the lock-screen notification on this device |
 | `thistle:splashSeen:v1` | Whether the welcome screen was dismissed |
 | `thistle:log:v1` | The last 200 diagnostic log entries |
 
@@ -80,5 +84,6 @@ Nothing is sent anywhere. If you clear your browser's site data, or uninstall th
 
 - **iOS sound:** when the ringer switch is on silent, iOS mutes web audio, so the beeps won't play.
 - **iOS background:** if you lock the phone or switch apps mid-workout, iOS pauses the page. The timer stays accurate (it works from timestamps), but no beeps play until you come back. The wake lock keeps the screen on while you stay in the app.
+- **Lock-screen counters** use a notification with − and + buttons, which only Android browsers support. Changes made there are held by the service worker (in IndexedDB, `thistle-sw`) until the app next opens.
 - **Install on iOS** works from Safari only: Share → **Add to Home Screen**.
 - **Vibration** is not used, because iOS doesn't support it.

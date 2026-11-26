@@ -1,6 +1,6 @@
 // Covers: creating, editing, duplicating and deleting timers; validation; unsaved-change guard;
-// reordering blocks and steps.
-import { simpleTimer } from "../support/builders.js";
+// reordering blocks and steps; the card's kind bar and completion badge.
+import { historyEntry, simpleTimer } from "../support/builders.js";
 
 describe("timers", () => {
   it("creates a timer and keeps it after reload", () => {
@@ -115,5 +115,28 @@ describe("timers", () => {
     cy.readStore("timers").then((timers) => {
       expect(timers.map((t) => t.name)).to.deep.eq(["Legs", "Arms"]);
     });
+  });
+
+  it("orders the card's bar warm-up first, whatever the step order", () => {
+    const t = simpleTimer("t1", "Mixed");
+    t.blocks[0].steps = [
+      { id: "s1", kind: "cooldown", name: "", seconds: 30 },
+      { id: "s2", kind: "work", name: "", seconds: 30 },
+      { id: "s3", kind: "warmup", name: "", seconds: 30 },
+    ];
+    cy.gotoApp({ timers: [t] });
+    cy.tid("timer-card-bar").then(($bars) => {
+      expect(Array.from($bars, (b) => b.dataset.kind)).to.deep.eq(["warmup", "work", "cooldown"]);
+    });
+  });
+
+  it("badges each card with its finished runs from History", () => {
+    const run = (id, timerId, completed) => ({ ...historyEntry(id, "x", { completed }), timerId });
+    cy.gotoApp({
+      timers: [simpleTimer("t1", "Done twice"), simpleTimer("t2", "Never done")],
+      history: [run("h1", "t1", true), run("h2", "t1", true), run("h3", "t1", false), run("h4", "t2", false)],
+    });
+    cy.tid("timer-card").eq(0).find('[data-testid="timer-card-done"]').should("contain", "2").and("have.attr", "aria-label", "Completed 2 times");
+    cy.tid("timer-card").eq(1).find('[data-testid="timer-card-done"]').should("not.exist");
   });
 });

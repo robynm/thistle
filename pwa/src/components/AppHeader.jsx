@@ -4,7 +4,7 @@ import { I } from "../lib/icons.jsx";
 import { ui } from "../lib/ui.js";
 
 // Shows the current view's title. `action` is that view's one header button, if any.
-function AppHeader({ title, subtitle, action, theme, onToggleTheme, onOpenBackup }) {
+function AppHeader({ title, subtitle, action, theme, onToggleTheme, onOpenBackup, onOpenLockScreen }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
   useBackButton(menuOpen, closeMenu);
@@ -37,6 +37,9 @@ function AppHeader({ title, subtitle, action, theme, onToggleTheme, onOpenBackup
               <div className="absolute right-0 top-full mt-1 z-50 bg-bg rounded-2xl shadow-[0_12px_32px_-12px_rgba(0,0,0,0.25)] ring-1 ring-line min-w-[200px] overflow-hidden py-1 fade-up" data-testid="menu">
                 <button type="button" className={row} data-testid="menu-theme" onClick={() => { closeMenu(); onToggleTheme(); }}>
                   <nextTheme.Icon size={16} /> {nextTheme.label}
+                </button>
+                <button type="button" className={row} data-testid="menu-lockscreen" onClick={() => { closeMenu(); onOpenLockScreen(); }}>
+                  <I.smartphone size={16} /> Lock screen
                 </button>
                 <button type="button" className={row} data-testid="menu-backup" onClick={() => { closeMenu(); onOpenBackup(); }}>
                   <I.download size={16} /> Backup &amp; restore

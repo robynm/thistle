@@ -1,4 +1,4 @@
-// Covers: first-run splash, tab switching, theme toggle, device Back closing overlays.
+// Covers: first-run splash, tab switching, theme toggle, lock-screen setting, device Back closing overlays.
 
 describe("navigation", () => {
   it("shows the splash once, then remembers it was dismissed", () => {
@@ -13,8 +13,9 @@ describe("navigation", () => {
   it("switches between tabs", () => {
     cy.gotoApp();
     cy.tid("timers-empty").should("exist");
-    cy.tab("quick");
-    cy.tid("quick-view").should("exist");
+    cy.tab("counters");
+    cy.tid("counters-empty").should("exist");
+    cy.tid("counters-new").should("exist");
     cy.tid("timers-new").should("not.exist");
     cy.tab("history");
     cy.tid("history-empty").should("exist");
@@ -46,5 +47,20 @@ describe("navigation", () => {
     cy.go("back");
     cy.tid("backup-modal").should("not.exist");
     cy.tid("timers-view").should("exist");
+  });
+
+  it("picks a lock-screen mode and keeps it after reload", () => {
+    cy.gotoApp();
+    cy.readStore("lockScreen").should("eq", "off");
+    cy.tid("menu-button").click();
+    cy.tid("menu-lockscreen").click();
+    cy.tid("lockscreen-off").should("have.attr", "aria-checked", "true");
+    cy.tid("lockscreen-media").click();
+    cy.tid("lockscreen-media").should("have.attr", "aria-checked", "true");
+    cy.readStore("lockScreen").should("eq", "media");
+    cy.reload();
+    cy.tid("menu-button").click();
+    cy.tid("menu-lockscreen").click();
+    cy.tid("lockscreen-media").should("have.attr", "aria-checked", "true");
   });
 });

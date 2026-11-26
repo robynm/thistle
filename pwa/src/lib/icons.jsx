@@ -36,7 +36,7 @@ const I = {
   skipForward: make(<><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" /><path d="M19 5v14" /></>),
   skipBack: make(<><polygon points="19 20 9 12 19 4 19 20" fill="currentColor" /><path d="M5 19V5" /></>),
   timer: make(<><path d="M10 2h4M12 14l3-3" /><circle cx="12" cy="14" r="8" /></>),
-  zap: make(<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />),
+  hash: make(<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18" />),
   history: make(<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5M12 7v5l4 2" /></>),
   trash: make(<path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />),
   copy: make(<><rect x="8" y="8" width="14" height="14" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></>),
@@ -55,6 +55,7 @@ const I = {
   repeat: make(<path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3" />),
   smartphone: make(<><rect x="5" y="2" width="14" height="20" rx="2" /><path d="M12 18h.01" /></>),
   wifiOff: make(<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M2 8.82a15 15 0 0 1 4.17-2.65M10.66 5c4.01-.36 8.14.9 11.34 3.76M16.85 11.25a10 10 0 0 1 2.22 1.68M5 13a10 10 0 0 1 5.24-2.76M12 20h.01" />),
+  bell: make(<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" />),
   share: make(<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" />),
 };
 

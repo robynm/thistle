@@ -1,9 +1,10 @@
-// Create, rename or delete a list. Deleting moves its timers to the top level.
+// Create, rename or delete a list of timers or counters (`noun`). Deleting moves its
+// items to the top level.
 import { useState } from "react";
 import { ui } from "../lib/ui.js";
 import { Modal } from "./Modal.jsx";
 
-function ListModal({ list, isNew, onSave, onDelete, onClose }) {
+function ListModal({ list, isNew, noun = "timers", onSave, onDelete, onClose }) {
   const [name, setName] = useState(list.name);
   const [error, setError] = useState("");
 
@@ -31,7 +32,7 @@ function ListModal({ list, isNew, onSave, onDelete, onClose }) {
   );
 
   return (
-    <Modal name="list" title={isNew ? "New list" : "Edit list"} blurb="Group timers into lists to keep them tidy." onClose={onClose} footer={footer}>
+    <Modal name="list" title={isNew ? "New list" : "Edit list"} blurb={`Group ${noun} into lists to keep them tidy.`} onClose={onClose} footer={footer}>
       <form onSubmit={save}>
         <input
           type="text"

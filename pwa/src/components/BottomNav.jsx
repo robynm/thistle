@@ -2,7 +2,7 @@ import { I } from "../lib/icons.jsx";
 
 const TABS = [
   { id: "timers", label: "Timers", Icon: I.timer },
-  { id: "quick", label: "Quick start", Icon: I.zap },
+  { id: "counters", label: "Counters", Icon: I.hash },
   { id: "history", label: "History", Icon: I.history },
 ];
 

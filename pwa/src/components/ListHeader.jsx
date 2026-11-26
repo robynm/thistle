@@ -1,4 +1,4 @@
-// A list's section header on the Timers tab: grip, collapse toggle, name, count, edit.
+// A list's section header on the Timers or Counters tab: grip, collapse toggle, name, count, edit.
 import { I } from "../lib/icons.jsx";
 import { ui } from "../lib/ui.js";
 import { DragGrip } from "./DragGrip.jsx";

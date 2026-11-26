@@ -1,20 +1,24 @@
 // Export everything to one JSON file, and read it back.
 //
-// File shape: { format: "thistle-backup-v1", exportedAt, counts, data: { timers, lists, history, quick } }
+// File shape: { format: "thistle-backup-v1", exportedAt, counts,
+//               data: { timers, lists, history, quick, counters, counterLists } }
 // `lists` was added later; backups without it import with every timer at the top level.
+// `counters` and `counterLists` were added later still; a backup without them leaves
+// this device's counters alone, even on "replace".
 // Import supports "merge" (add records whose id isn't already here, keep the rest) and
 // "replace" (the backup's records become the whole collection). Settings such as theme
 // and sound are per-device and are not included.
 import { BACKUP_FORMAT, QUICK_DEFAULTS } from "./constants.js";
+import { cleanCounter } from "./counterModel.js";
 import { cleanHistoryEntry, cleanList, cleanTimer } from "./timerModel.js";
 
 // --- Export ---------------------------------------------------
-export function buildBackup({ timers, lists, history, quick }) {
+export function buildBackup({ timers, lists, history, quick, counters, counterLists }) {
   return {
     format: BACKUP_FORMAT,
     exportedAt: new Date().toISOString(),
-    counts: { timers: timers.length, lists: lists.length, history: history.length },
-    data: { timers, lists, history, quick },
+    counts: { timers: timers.length, lists: lists.length, history: history.length, counters: counters.length, counterLists: counterLists.length },
+    data: { timers, lists, history, quick, counters, counterLists },
   };
 }
 
@@ -54,6 +58,12 @@ export function parseBackup(text) {
   const timers = rawTimers.map(cleanTimer).filter(Boolean);
   const lists = rawLists.map(cleanList).filter(Boolean);
   const history = rawHistory.map(cleanHistoryEntry).filter(Boolean);
+  // null (not []) when the backup predates counters, so import can leave them alone.
+  const hasCounters = Array.isArray(obj.data.counters);
+  const rawCounters = hasCounters ? obj.data.counters : [];
+  const rawCounterLists = Array.isArray(obj.data.counterLists) ? obj.data.counterLists : [];
+  const counters = hasCounters ? rawCounters.map(cleanCounter).filter(Boolean) : null;
+  const counterLists = hasCounters ? rawCounterLists.map(cleanList).filter(Boolean) : null;
   const q = obj.data.quick;
   const quick = q && typeof q === "object" ? { ...QUICK_DEFAULTS, ...q } : null;
   return {
@@ -61,7 +71,13 @@ export function parseBackup(text) {
     lists,
     history,
     quick,
-    skipped: rawTimers.length - timers.length + (rawHistory.length - history.length) + (rawLists.length - lists.length),
+    counters,
+    counterLists,
+    skipped:
+      rawTimers.length - timers.length +
+      (rawHistory.length - history.length) +
+      (rawLists.length - lists.length) +
+      (counters ? rawCounters.length - counters.length + (rawCounterLists.length - counterLists.length) : 0),
   };
 }
 

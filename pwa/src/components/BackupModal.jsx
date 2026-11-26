@@ -7,9 +7,12 @@ import { Log } from "../lib/log.js";
 import { ui } from "../lib/ui.js";
 import { Modal } from "./Modal.jsx";
 
-const counts = (t, h) => `${plural(t, "timer")} and ${plural(h, "history entry", "history entries")}`;
+const counts = (t, h, c = 0) =>
+  c
+    ? `${plural(t, "timer")}, ${plural(c, "counter")} and ${plural(h, "history entry", "history entries")}`
+    : `${plural(t, "timer")} and ${plural(h, "history entry", "history entries")}`;
 
-function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
+function BackupModal({ timers, lists, history, quick, counters, counterLists, onImport, onClose }) {
   const fileRef = useRef(null);
   const [pending, setPending] = useState(null);
   const [message, setMessage] = useState(null);
@@ -17,8 +20,8 @@ function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
   const [logEntries, setLogEntries] = useState([]);
 
   const exportNow = () => {
-    downloadJson(buildBackup({ timers, lists, history, quick }), backupFileName());
-    setMessage({ ok: true, text: `Saved ${counts(timers.length, history.length)} to your downloads.` });
+    downloadJson(buildBackup({ timers, lists, history, quick, counters, counterLists }), backupFileName());
+    setMessage({ ok: true, text: `Saved ${counts(timers.length, history.length, counters.length)} to your downloads.` });
   };
 
   const pickFile = async (e) => {
@@ -36,14 +39,14 @@ function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
   };
 
   const apply = (mode) => {
-    if (mode === "replace" && !confirm("Replace everything? Your current timers and history on this device will be overwritten by the backup.")) return;
+    if (mode === "replace" && !confirm(`Replace everything? Your current ${pending.counters ? "timers, counters and history" : "timers and history"} on this device will be overwritten by the backup.`)) return;
     const res = onImport(pending, mode);
     setPending(null);
     setMessage({
       ok: true,
       text: mode === "replace"
-        ? `Restored ${counts(res.timers, res.history)}.`
-        : `Added ${counts(res.timers, res.history)}. Anything you already had was kept.`,
+        ? `Restored ${counts(res.timers, res.history, res.counters)}.`
+        : `Added ${counts(res.timers, res.history, res.counters)}. Anything you already had was kept.`,
     });
   };
 
@@ -65,7 +68,7 @@ function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
     <Modal
       name="backup"
       title="Backup & restore"
-      blurb="Your timers and history live only on this device. Save a backup file now and then, so clearing your browser data or switching phones doesn't lose them."
+      blurb="Your timers, counters and history live only on this device. Save a backup file now and then, so clearing your browser data or switching phones doesn't lose them."
       onClose={onClose}
     >
       {message && (
@@ -90,7 +93,7 @@ function BackupModal({ timers, lists, history, quick, onImport, onClose }) {
       {pending && (
         <div className="mt-4 rounded-2xl bg-surface p-4 fade-up" data-testid="backup-pending">
           <p className="text-sm text-ink">
-            This backup has {counts(pending.timers.length, pending.history.length)}
+            This backup has {counts(pending.timers.length, pending.history.length, pending.counters?.length ?? 0)}
             {pending.skipped > 0 && <> ({pending.skipped} unreadable, will be skipped)</>}.
           </p>
           <div className="grid grid-cols-2 gap-2 mt-3">
